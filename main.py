@@ -13,6 +13,7 @@ def main() -> None:
         Config.validate()
     except ValueError as e:
         logger.error(f"Configuration error: {e}")
+        print(f"Configuration error: {e}")
         sys.exit(1)
 
     logger.info("Starting MCP server for Dalux via stdio.")
