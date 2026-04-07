@@ -21,11 +21,23 @@ class DaluxAdapter:
             return response.json()
 
     def get_tasks(self, project_id: str) -> list:
+        """GET /5.1/projects/{projectId}/tasks"""
         return self._get(f"/5.1/projects/{project_id}/tasks")    
+    
+    # Single resource endpoint returns as dict, not list
+    def get_task(self, project_id: str, task_id: str) -> dict:
+        """GET /3.3/projects/{projectId}/tasks/{taskId}"""
+        return self._get(f"/3.3/projects/{project_id}/tasks/{task_id}")
 
-    # def get_task
-    # def get_task_attachment
-    # def get_tash_changes
+    def get_task_attachments(self, project_id: str) -> list:
+        """GET /1.1/projects/{projectId}/tasks/attachments"""
+        return self._get(f"/1.1/projects/{project_id}/tasks/attachments")
+
+    def get_task_changes(self, project_id: str) -> list:
+        """GET /2.2/projects/{projectId}/tasks/changes"""
+        return self._get(f"/2.2/projects/{project_id}/tasks/changes") 
+
+
 
 
 

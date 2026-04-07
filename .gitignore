@@ -1,3 +1,8 @@
 .env
+
 __pycache__/
 __pycache__
+
+# Exclude all json files except settings.json
+*.json
+!settings.json
