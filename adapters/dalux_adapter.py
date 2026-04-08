@@ -42,10 +42,10 @@ class DaluxAdapter:
                 normalized.append(value)
         return normalized
 
-    def _first_or_none(self, payload: dict | list) -> dict | None:
-        """Return first item from a documented Dalux collection envelope."""
-        items = self._normalize_collection(payload)
-        return items[0] if items else None
+    # def _first_or_none(self, payload: dict | list) -> dict | None:
+    #     """Return first item from a documented Dalux collection envelope."""
+    #     items = self._normalize_collection(payload)
+    #     return items[0] if items else None
 
     # Public methods for GET endpoints related to Tasks
     
@@ -59,8 +59,8 @@ class DaluxAdapter:
     def get_task(self, task_id: str, project_id: str | None = None) -> dict | None:
         """GET /3.3/projects/{projectId}/tasks/{taskId}"""
         project_id = self.enforce_project_constraints(project_id)
-        payload = self._get(f"/3.3/projects/{project_id}/tasks/{task_id}")
-        return self._first_or_none(payload)
+        return self._get(f"/3.3/projects/{project_id}/tasks/{task_id}")
+        # return self._first_or_none(payload)
 
     def get_task_attachments(self, project_id: str | None = None) -> list[dict]:
         """GET /1.1/projects/{projectId}/tasks/attachments"""
@@ -73,8 +73,6 @@ class DaluxAdapter:
         project_id = self.enforce_project_constraints(project_id)
         payload = self._get(f"/2.2/projects/{project_id}/tasks/changes")
         return self._normalize_collection(payload)
-
-
 
 
 
