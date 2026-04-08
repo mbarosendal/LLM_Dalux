@@ -1,15 +1,13 @@
 import sys
 import logging
-from app.config import Config
-from app.orchestration import mcp
-from app.adapters.dalux_adapter import DaluxAdapter
+from config import Config
+from orchestration import mcp
+from adapters.dalux_adapter import DaluxAdapter
 import json
 
 logger = logging.getLogger(__name__)
 
 def main() -> None:
-
-    print("Starting MCP server for Dalux via stdio.")
 
     try:
         Config.validate()
@@ -31,12 +29,12 @@ def main() -> None:
         # return
     except ValueError as e:
         logger.error(f"Configuration error: {e}")
-        print(f"Configuration error: {e}")
+        print(f"Configuration error: {e}", file=sys.stderr)
         sys.exit(1)
 
     logger.info("Starting MCP server for Dalux via stdio.")
 
-    mcp.run(transport="stdio")
+    mcp.run(transport="stdio", show_banner=False)
 
 if __name__ == "__main__":
     main()

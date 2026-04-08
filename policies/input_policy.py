@@ -30,10 +30,4 @@ class InputPolicy:
         
         return cleaned_input
     
-<<<<<<< HEAD:policies/input_policy.py
     
-=======
-
-    # Append instructions based on words in put to control context? Tasks/Files, or leave to system_prompt?
-
->>>>>>> ca56b6ee0ce032f78858d3779f0638cd48aa3a2e:app/policies/input_policy.py

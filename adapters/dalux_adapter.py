@@ -1,5 +1,5 @@
 import httpx
-from app.config import Config
+from config import Config
 
 class DaluxAdapter:
 
@@ -61,7 +61,7 @@ class DaluxAdapter:
     def get_task(self, task_id: str, project_id: str | None = None) -> dict | None:
         """GET /3.3/projects/{projectId}/tasks/{taskId}"""
         project_id = self.enforce_project_constraints(project_id)
-        return self._get(f"/3.3/projects/{project_id}/tasks/{task_id}")
+        return self._execute_get(f"/3.3/projects/{project_id}/tasks/{task_id}")
         # return self._first_or_none(payload)
 
     def get_task_attachments(self, project_id: str | None = None) -> list[dict]:
