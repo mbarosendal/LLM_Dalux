@@ -1,3 +1,4 @@
+<<<<<<< HEAD:language_model/prompts/dalux_context.py
 def build_dalux_context() -> str:
     """
     Instructions for how to navigate and understand projects on Dalux for the language model.   
@@ -28,11 +29,21 @@ def build_dalux_context() -> str:
 def format_dalux_prompt(prompt: str) -> str:
     """
     Instructions for how to process the user's prompt for the language model.
+=======
+
+
+
+
+def format_dalux_query(prompt: str) -> str:
+    """
+    Formats the user's query for the AI with Dalux context.
+>>>>>>> ca56b6ee0ce032f78858d3779f0638cd48aa3a2e:app/language_model/prompts/dalux_context.py
     
     Args:
         prompt: Raw user input
     
     Returns:
+<<<<<<< HEAD:language_model/prompts/dalux_context.py
         A string with instructions and guidance for the language model on how to interpret the user's question and determine which Dalux data and API methods are needed to answer it.
     """
     return f"""
@@ -50,3 +61,25 @@ def format_dalux_prompt(prompt: str) -> str:
 
         Respond with the necessary function calls, then provide a natural language answer with the data.
         """
+=======
+        Formatted query with guidance
+    """
+    return f"""
+User question: {prompt}
+
+Please analyze this question and determine:
+1. What Dalux data is needed (files, folders, users, project info)
+2. Which API method(s) to call based on tools available
+3. How to navigate the hierarchy (file areas → folders → files)
+4. How to present the results clearly to the user
+
+Remember:
+- Use find_folder_by_name() when user mentions a folder name
+- Use find_files_by_name() when searching for specific files
+- Look up user details when questions involve "who"
+- Sort/filter appropriately for chronological or size-based queries
+- Inform user if results are limited due to token management
+
+Respond with the necessary function calls, then provide a natural language answer with the data.
+"""
+>>>>>>> ca56b6ee0ce032f78858d3779f0638cd48aa3a2e:app/language_model/prompts/dalux_context.py

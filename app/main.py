@@ -1,8 +1,8 @@
 import sys
 import logging
-from config import Config
-from orchestration import mcp
-from adapters.dalux_adapter import DaluxAdapter
+from app.config import Config
+from app.orchestration import mcp
+from app.adapters.dalux_adapter import DaluxAdapter
 import json
 
 logger = logging.getLogger(__name__)
