@@ -20,20 +20,18 @@ def get_tasks(project_id: str | None = None):
     Returns a list of tasks, each with basic info like id, name, status, etc. 
     For more details on a specific task when you already know the task_id, use get_task(task_id) instead.
     """
-    requested_project_id = project_id
+    project_label = project_id or "default project"
     try:
-        approved_project_id = _adapter.enforce_project_constraints(project_id)
-
-        tasks = _adapter.get_tasks(approved_project_id)
+        tasks = _adapter.get_tasks(project_id)
         if not tasks:
-            return f"No tasks found for project {approved_project_id}."
+            return f"No tasks found for {project_label}."
 
         # /5.1/tasks returns a list of envelopes with the actual payload under data.
         task_items = tasks if isinstance(tasks, list) else tasks.get("items", [])
         if not isinstance(task_items, list) or not task_items:
-            return f"No tasks found for project {approved_project_id}."
+            return f"No tasks found for {project_label}."
 
-        lines = [f"Found {len(task_items)} task(s) for project {approved_project_id}."]
+        lines = [f"Found {len(task_items)} task(s) for {project_label}."]
 
         for t in task_items:
             data = t.get("data", t) if isinstance(t, dict) else {}
@@ -62,10 +60,10 @@ def get_tasks(project_id: str | None = None):
                 )
             )
 
-        logging.info(f"Successfully fetched {len(task_items)} tasks for project {approved_project_id}.")
+        logging.info(f"Successfully fetched {len(task_items)} tasks for {project_label}.")
         return "\n".join(lines)
 
     except Exception as e:
-        logging.error(f"Error fetching tasks for project {requested_project_id}: {e}")
-        return f"Error fetching tasks for project {requested_project_id}: {e}"
+        logging.error(f"Error fetching tasks for {project_label}: {e}")
+        return f"Error fetching tasks for {project_label}: {e}"
 
