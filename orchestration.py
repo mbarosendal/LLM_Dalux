@@ -26,24 +26,18 @@ def get_tasks(project_id: str | None = None):
         if not tasks:
             return f"No tasks found for {project_label}."
 
-        # /5.1/tasks returns a list of envelopes with the actual payload under data.
-        task_items = tasks if isinstance(tasks, list) else tasks.get("items", [])
-        if not isinstance(task_items, list) or not task_items:
-            return f"No tasks found for {project_label}."
+        lines = [f"Found {len(tasks)} task(s) for {project_label}."]
 
-        lines = [f"Found {len(task_items)} task(s) for {project_label}."]
+        for task in tasks:
+            type_info = task.get("type", {})
+            created_by = task.get("createdBy", {})
 
-        for t in task_items:
-            data = t.get("data", t) if isinstance(t, dict) else {}
-            type_info = data.get("type", {}) if isinstance(data, dict) else {}
-            created_by = data.get("createdBy", {}) if isinstance(data, dict) else {}
-
-            task_id = data.get("taskId", "N/A")
-            subject = data.get("subject", "No subject")
-            usage = data.get("usage", "N/A")
+            task_id = task.get("taskId", "N/A")
+            subject = task.get("subject", "No subject")
+            usage = task.get("usage", "N/A")
             type_name = type_info.get("name", "N/A")
-            number = data.get("number", "N/A")
-            created = data.get("created", "N/A")
+            number = task.get("number", "N/A")
+            created = task.get("created", "N/A")
             created_by_user_id = created_by.get("userId", "N/A")
 
             lines.append(
@@ -60,10 +54,12 @@ def get_tasks(project_id: str | None = None):
                 )
             )
 
-        logging.info(f"Successfully fetched {len(task_items)} tasks for {project_label}.")
+        logging.info(f"Successfully fetched {len(tasks)} tasks for {project_label}.")
         return "\n".join(lines)
 
     except Exception as e:
         logging.error(f"Error fetching tasks for {project_label}: {e}")
         return f"Error fetching tasks for {project_label}: {e}"
 
+if __name__ == "__main__":
+    print(get_tasks())

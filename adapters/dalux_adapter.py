@@ -29,27 +29,50 @@ class DaluxAdapter:
         response.raise_for_status()
         return response.json()
 
+    def _normalize_collection(self, payload: dict | list, unwrap_key: str | None = None) -> list[dict]:
+        """Normalize documented Dalux collections to a list of dict objects."""
+        items = payload.get("items", []) if isinstance(payload, dict) else []
+
+        normalized: list[dict] = []
+        for item in items:
+            if not isinstance(item, dict):
+                continue
+            value = item.get(unwrap_key, {}) if unwrap_key else item
+            if isinstance(value, dict):
+                normalized.append(value)
+        return normalized
+
+    def _first_or_none(self, payload: dict | list) -> dict | None:
+        """Return first item from a documented Dalux collection envelope."""
+        items = self._normalize_collection(payload)
+        return items[0] if items else None
+
     # Public methods for GET endpoints related to Tasks
-    def get_tasks(self, project_id: str | None = None) -> list | dict:
+    
+    def get_tasks(self, project_id: str | None = None) -> list[dict]:
         """GET /5.1/projects/{projectId}/tasks"""
         project_id = self.enforce_project_constraints(project_id)
-        return self._get(f"/5.1/projects/{project_id}/tasks")    
+        payload = self._get(f"/5.1/projects/{project_id}/tasks")
+        return self._normalize_collection(payload, unwrap_key="data")
     
     # Single resource endpoint returns as dict, not list
-    def get_task(self, task_id: str, project_id: str | None = None) -> dict:
+    def get_task(self, task_id: str, project_id: str | None = None) -> dict | None:
         """GET /3.3/projects/{projectId}/tasks/{taskId}"""
         project_id = self.enforce_project_constraints(project_id)
-        return self._get(f"/3.3/projects/{project_id}/tasks/{task_id}")
+        payload = self._get(f"/3.3/projects/{project_id}/tasks/{task_id}")
+        return self._first_or_none(payload)
 
-    def get_task_attachments(self, project_id: str | None = None) -> list | dict:
+    def get_task_attachments(self, project_id: str | None = None) -> list[dict]:
         """GET /1.1/projects/{projectId}/tasks/attachments"""
         project_id = self.enforce_project_constraints(project_id)
-        return self._get(f"/1.1/projects/{project_id}/tasks/attachments")
+        payload = self._get(f"/1.1/projects/{project_id}/tasks/attachments")
+        return self._normalize_collection(payload)
 
-    def get_task_changes(self, project_id: str | None = None) -> dict:
+    def get_task_changes(self, project_id: str | None = None) -> list[dict]:
         """GET /2.2/projects/{projectId}/tasks/changes"""
         project_id = self.enforce_project_constraints(project_id)
-        return self._get(f"/2.2/projects/{project_id}/tasks/changes") 
+        payload = self._get(f"/2.2/projects/{project_id}/tasks/changes")
+        return self._normalize_collection(payload)
 
 
 
