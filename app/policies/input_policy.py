@@ -22,10 +22,16 @@ class InputPolicy:
         """
         if not user_input:
             raise ValueError("Input cannot be empty.")
+        
         cleaned_input = user_input.strip()
         if not cleaned_input:
             raise ValueError("Input cannot consist only of whitespace.")
+        
         if len(cleaned_input) > MAX_INPUT_LENGTH:
             raise ValueError(f"Input exceeds maximum length of {MAX_INPUT_LENGTH} characters.")
+        
         return cleaned_input
+    
+
+    # Append instructions based on words in put to control context? Tasks/Files, or leave to system_prompt?
 

@@ -1,6 +1,6 @@
 
 
-from base_client import BaseClient
+from app.language_model.clients.base_client import BaseClient
 
 class ClaudeClient(BaseClient):
 
