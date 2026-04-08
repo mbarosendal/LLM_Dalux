@@ -1,5 +1,3 @@
-
-
 MAX_INPUT_LENGTH = 1000  # Maximum allowed input length for the language model
 
 class InputPolicy:
@@ -15,17 +13,21 @@ class InputPolicy:
     #     return user_input.strip()
 
     @staticmethod
-    def validate_input(user_input: str) -> str:
+    def validate_prompt(user_input: str) -> str:
         """
         Validate and clean incoming prompt text.
         Returns the cleaned text or raises ValueError.
         """
         if not user_input:
             raise ValueError("Input cannot be empty.")
+        
         cleaned_input = user_input.strip()
         if not cleaned_input:
             raise ValueError("Input cannot consist only of whitespace.")
+        
         if len(cleaned_input) > MAX_INPUT_LENGTH:
             raise ValueError(f"Input exceeds maximum length of {MAX_INPUT_LENGTH} characters.")
+        
         return cleaned_input
-
+    
+    

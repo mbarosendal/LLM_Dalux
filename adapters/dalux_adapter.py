@@ -5,8 +5,8 @@ class DaluxAdapter:
 
     # Constructor retrieves config values, headers, and initializes HTTP client
     def __init__(self):
-        self._project_id = Config.DALUX_PROJECT_ID
-        self._test_mode = Config.DALUX_TEST_MODE
+        self._scoped_project_id = Config.DALUX_SCOPED_PROJECT_ID
+        self._use_test_project = Config.IS_TEST_PROJECT_ONLY
         self._base = Config.DALUX_BASE_URL
         self._headers = {
             "x-api-key": Config.DALUX_API_KEY,
@@ -16,8 +16,8 @@ class DaluxAdapter:
 
     def enforce_project_constraints(self, project_id: str | None = None) -> str:
         """Return effective project id and enforce test-mode constraints."""
-        approved_project_id = project_id or self._project_id
-        if self._test_mode and approved_project_id != self._project_id:
+        approved_project_id = project_id or self._scoped_project_id
+        if self._use_test_project and approved_project_id != self._scoped_project_id:
             raise ValueError("Test mode is enabled; only the configured DALUX_PROJECT_ID is allowed.")
         return approved_project_id
 
