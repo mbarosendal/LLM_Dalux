@@ -2,7 +2,6 @@ import logging
 from fastmcp import FastMCP
 from language_model.prompts.system_prompt import SYSTEM_PROMPT
 from adapters.dalux_adapter import DaluxAdapter
-from config import Config
 
 # Set up MCP object with resources
 mcp = FastMCP(
@@ -10,31 +9,31 @@ mcp = FastMCP(
     instructions=SYSTEM_PROMPT,
 )
 
-# Not hidden from Claude!!
-standardProjectId = Config.DALUX_PROJECT_ID
-
-# Shared adapter instance?
+# Shared adapter instance
 _adapter = DaluxAdapter()
 
 # Expose adapter methods as MCP functions
 @mcp.tool()
-def get_tasks(project_id: str = standardProjectId):
+def get_tasks(project_id: str | None = None):
     """Get all tasks for a project.
     Use this when the user wants to see a list of tasks, or search for a task by name or other attributes.
     Returns a list of tasks, each with basic info like id, name, status, etc. 
     For more details on a specific task when you already know the task_id, use get_task(task_id) instead.
     """
+    requested_project_id = project_id
     try:
-        tasks = _adapter.get_tasks(project_id)
+        approved_project_id = _adapter.enforce_project_constraints(project_id)
+
+        tasks = _adapter.get_tasks(approved_project_id)
         if not tasks:
-            return f"No tasks found for project {project_id}."
+            return f"No tasks found for project {approved_project_id}."
 
         # /5.1/tasks returns a list of envelopes with the actual payload under data.
         task_items = tasks if isinstance(tasks, list) else tasks.get("items", [])
         if not isinstance(task_items, list) or not task_items:
-            return f"No tasks found for project {project_id}."
+            return f"No tasks found for project {approved_project_id}."
 
-        lines = [f"Found {len(task_items)} task(s) for project {project_id}."]
+        lines = [f"Found {len(task_items)} task(s) for project {approved_project_id}."]
 
         for t in task_items:
             data = t.get("data", t) if isinstance(t, dict) else {}
@@ -63,10 +62,10 @@ def get_tasks(project_id: str = standardProjectId):
                 )
             )
 
-        logging.info(f"Successfully fetched {len(task_items)} tasks for project {project_id}.")
+        logging.info(f"Successfully fetched {len(task_items)} tasks for project {approved_project_id}.")
         return "\n".join(lines)
 
     except Exception as e:
-        logging.error(f"Error fetching tasks for project {project_id}: {e}")
-        return f"Error fetching tasks for project {project_id}: {e}"
+        logging.error(f"Error fetching tasks for project {requested_project_id}: {e}")
+        return f"Error fetching tasks for project {requested_project_id}: {e}"
 

@@ -4,10 +4,12 @@ from dotenv import load_dotenv
 load_dotenv()  # Load environment variables from .env file
 
 class Config:
-    
+    # Switch to enforce project constraints in the adapter
+    DALUX_TEST_MODE = True
+    DALUX_PROJECT_ID = os.getenv("DALUX_PROJECT_ID")
+
     DALUX_BASE_URL = os.getenv("DALUX_BASE_URL")
     DALUX_API_KEY = os.getenv("DALUX_API_KEY")
-    DALUX_PROJECT_ID = os.getenv("DALUX_PROJECT_ID") # Hardcoded to testproject
 
     @classmethod
     def validate(cls) -> None:
