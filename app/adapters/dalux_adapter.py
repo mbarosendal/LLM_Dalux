@@ -5,13 +5,8 @@ class DaluxAdapter:
 
     # Constructor retrieves config values, headers, and initializes HTTP client
     def __init__(self):
-<<<<<<< HEAD:adapters/dalux_adapter.py
         self._scoped_project_id = Config.DALUX_SCOPED_PROJECT_ID
         self._use_test_project = Config.IS_TEST_PROJECT_ONLY
-=======
-        self._project_id = Config.DALUX_PROJECT_ID
-        self._test_project = Config.USE_TEST_PROJECT_ONLY
->>>>>>> ca56b6ee0ce032f78858d3779f0638cd48aa3a2e:app/adapters/dalux_adapter.py
         self._base = Config.DALUX_BASE_URL
         self._headers = {
             "x-api-key": Config.DALUX_API_KEY,
@@ -21,13 +16,8 @@ class DaluxAdapter:
 
     def enforce_project_constraints(self, project_id: str | None = None) -> str:
         """Return effective project id and enforce test-mode constraints."""
-<<<<<<< HEAD:adapters/dalux_adapter.py
         approved_project_id = project_id or self._scoped_project_id
         if self._use_test_project and approved_project_id != self._scoped_project_id:
-=======
-        approved_project_id = project_id or self._project_id
-        if self._test_project and approved_project_id != self._project_id:
->>>>>>> ca56b6ee0ce032f78858d3779f0638cd48aa3a2e:app/adapters/dalux_adapter.py
             raise ValueError("Test mode is enabled; only the configured DALUX_PROJECT_ID is allowed.")
         return approved_project_id
 
@@ -71,13 +61,8 @@ class DaluxAdapter:
     def get_task(self, task_id: str, project_id: str | None = None) -> dict | None:
         """GET /3.3/projects/{projectId}/tasks/{taskId}"""
         project_id = self.enforce_project_constraints(project_id)
-<<<<<<< HEAD:adapters/dalux_adapter.py
         return self._get(f"/3.3/projects/{project_id}/tasks/{task_id}")
         # return self._first_or_none(payload)
-=======
-        payload = self._execute_get(f"/3.3/projects/{project_id}/tasks/{task_id}")
-        return self._first_or_none(payload)
->>>>>>> ca56b6ee0ce032f78858d3779f0638cd48aa3a2e:app/adapters/dalux_adapter.py
 
     def get_task_attachments(self, project_id: str | None = None) -> list[dict]:
         """GET /1.1/projects/{projectId}/tasks/attachments"""
