@@ -1,12 +1,15 @@
 import os
+from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
+# Resolve .env from project root so server startup does not depend on cwd.
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+load_dotenv(PROJECT_ROOT / ".env")
 
 class Config:
     # Switches to enforce project constraints 
     # TEST_MODE_ON = True
-    USE_TEST_PROJECT_ONLY = True
+    IS_TEST_PROJECT_ONLY = True
     DALUX_PROJECT_ID = os.getenv("DALUX_PROJECT_ID")
 
     DALUX_BASE_URL = os.getenv("DALUX_BASE_URL")

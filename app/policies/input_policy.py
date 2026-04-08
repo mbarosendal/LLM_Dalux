@@ -15,7 +15,7 @@ class InputPolicy:
     #     return user_input.strip()
 
     @staticmethod
-    def validate_input(user_input: str) -> str:
+    def validate_prompt(user_input: str) -> str:
         """
         Validate and clean incoming prompt text.
         Returns the cleaned text or raises ValueError.
@@ -31,6 +31,7 @@ class InputPolicy:
             raise ValueError(f"Input exceeds maximum length of {MAX_INPUT_LENGTH} characters.")
         
         return cleaned_input
+    
     
 
     # Append instructions based on words in put to control context? Tasks/Files, or leave to system_prompt?

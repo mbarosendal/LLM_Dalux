@@ -3,10 +3,10 @@ from app.config import Config
 
 class DaluxAdapter:
 
-    # Constructor retrieves config values, headers, and initializes HTTP client
+    # Constructor retrieves config values, sets headers, and initializes HTTP client
     def __init__(self):
         self._project_id = Config.DALUX_PROJECT_ID
-        self._test_project = Config.USE_TEST_PROJECT_ONLY
+        self._test_project = Config.IS_TEST_PROJECT_ONLY
         self._base = Config.DALUX_BASE_URL
         self._headers = {
             "x-api-key": Config.DALUX_API_KEY,
