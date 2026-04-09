@@ -1,11 +1,15 @@
 .env
+.venv/
 
 # Exclude compiled Python files
 *.pyc 
 
 __pycache__/
 __pycache__
+.pytest_cache/
 
 # Exclude all json files except settings.json
 *.json
 !settings.json
+
+/json_dumps/
