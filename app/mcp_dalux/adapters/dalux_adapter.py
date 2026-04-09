@@ -1,5 +1,5 @@
 import httpx
-from config import Config
+from mcp_dalux.config import Config
 
 class DaluxAdapter:
 

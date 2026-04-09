@@ -1,6 +1,5 @@
 
-
-from MCP_Dalux.language_model.clients.base_client import BaseClient
+from mcp_dalux.language_model.clients.base_client import BaseClient
 
 class ClaudeClient(BaseClient):
 

@@ -3,7 +3,7 @@ import logging
 import httpx
 from fastmcp import FastMCP
 
-from adapters.dalux_adapter import DaluxAdapter
+from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 
 
 def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:

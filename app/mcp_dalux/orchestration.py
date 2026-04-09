@@ -1,7 +1,7 @@
 from fastmcp import FastMCP
-from language_model.prompts.system_prompt import SYSTEM_PROMPT
-from adapters.dalux_adapter import DaluxAdapter
-from tools.dalux_tools import register_dalux_tools
+from mcp_dalux.language_model.prompts.system_prompt import SYSTEM_PROMPT
+from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
+from mcp_dalux.tools.dalux_tools import register_dalux_tools
 
 # Setup
 

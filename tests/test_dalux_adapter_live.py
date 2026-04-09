@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from adapters.dalux_adapter import DaluxAdapter
+from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 
 pytestmark = pytest.mark.integration
 

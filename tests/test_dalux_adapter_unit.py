@@ -2,8 +2,8 @@ import httpx
 import pytest
 import respx
 
-from adapters.dalux_adapter import DaluxAdapter
-from config import Config
+from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
+from mcp_dalux.config import Config
 
 # 1) Config values are "monkeypatched" (temporarily overrides Python objects/attributes) so the adapter always uses predictable test settings
 @pytest.fixture
