@@ -48,10 +48,15 @@ class DaluxAdapter:
         project_id = self.enforce_project_constraints(project_id)
         return self._execute_get(f"/3.3/projects/{project_id}/tasks/{task_id}")["data"]
 
-    def get_task_changes(self, project_id: str | None = None) -> dict:
-        """GET /2.2/projects/{projectId}/tasks/changes"""
+    def get_task_changes(
+        self, project_id: str | None = None, bookmark: str | None = None
+    ) -> dict:
+        """GET /2.2/projects/{projectId}/tasks/changes with optional bookmark pagination."""
         project_id = self.enforce_project_constraints(project_id)
-        return self._execute_get(f"/2.2/projects/{project_id}/tasks/changes")
+        params = {"bookmark": bookmark} if bookmark else None
+        return self._execute_get(
+            f"/2.2/projects/{project_id}/tasks/changes", params=params
+        )
 
     # def get_task_attachments(self, project_id: str | None = None) -> dict:
     #     """GET /1.1/projects/{projectId}/tasks/attachments"""

@@ -64,6 +64,45 @@ def test_live_get_task_changes_smoke():
         assert isinstance(result["items"][0], dict)
 
 
+def test_live_get_users_smoke():
+    adapter = DaluxAdapter()
+    try:
+        result = adapter.get_users()
+        items = result.get("items", []) if isinstance(result, dict) else []
+        if not items:
+            pytest.skip(
+                "No users found in project; cannot verify get_users response shape."
+            )
+    finally:
+        adapter._client.close()
+
+    assert isinstance(result, dict)
+    assert "items" in result
+    assert isinstance(items, list)
+    if items:
+        assert isinstance(result["items"][0], dict)
+
+
+def test_live_get_user_smoke():
+    adapter = DaluxAdapter()
+    try:
+        result = adapter.get_users()
+        users = result.get("items", []) if isinstance(result, dict) else []
+        if not users:
+            pytest.skip("No users found in the project; cannot test get_user endpoint.")
+        user_id = users[0].get("userId")
+        if not user_id:
+            pytest.skip(
+                "First user does not have a userId; cannot test get_user endpoint."
+            )
+        result = adapter.get_user(user_id)
+    finally:
+        adapter._client.close()
+
+    assert isinstance(result, dict)
+    assert result.get("userId") == user_id
+
+
 # def test_live_get_task_attachments_smoke():
 #     adapter = DaluxAdapter()
 #     try:
