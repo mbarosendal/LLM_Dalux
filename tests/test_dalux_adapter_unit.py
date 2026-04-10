@@ -1,5 +1,5 @@
 # import httpx
-# import pytest
+import pytest
 # import respx
 
 # from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
@@ -46,3 +46,7 @@
 #     assert result["items"][0]["id"] == "t-1"
 #     assert result["items"][1]["title"] == "Second task"
 #     assert result["links"][0]["rel"] == "next"
+
+
+def test_dummy_unit() -> None:
+    assert True

@@ -1,6 +1,7 @@
 from functools import wraps
 from typing import Any, Callable
 
+from fastmcp.exceptions import ToolError
 from fastmcp.server.dependencies import get_context
 
 
@@ -38,9 +39,11 @@ class ToolPolicy:
             calls = self.calls_by_request.get(counter_key, 0)
 
             if calls >= self.max_calls:
-                raise ToolPolicyError(
-                    f"Max calls exceeded for '{fn.__name__}' in request '{request_key}' ({self.max_calls})."
+                message = (
+                    f"Tool call limit reached for '{fn.__name__}' in this request "
+                    f"({self.max_calls})."
                 )
+                raise ToolError(message) from ToolPolicyError(message)
 
             self.calls_by_request[counter_key] = calls + 1
             return fn(*args, **kwargs)
