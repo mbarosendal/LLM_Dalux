@@ -12,16 +12,17 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
 
     @mcp.tool()
     @ToolPolicy(max_calls=20)
-    def get_tasks(project_id: str | None = None):
+    def get_tasks(project_id: str | None = None, bookmark: str | None = None):
         """Get all tasks for a project.
         Use this when the user wants to see a list of tasks, or search for a task by name or other attributes.
         Returns a list of tasks, each with basic info like id, name, status (open or not), etc.
         The project_id is optional - omit it to use the default configured project. Never ask the user for a projectId.
+        The bookmark is optional - use it to request the next page from a previous response's nextPage link if needed. For pagination, pass only the bookmark token value (example: 63176033328), not /?bookmark=... and not a full URL.
         For more details on a specific task when you already know the task_id, use get_task(task_id) instead.
         """
         project_label = project_id or "default project"
         try:
-            tasks_payload = adapter.get_tasks(project_id)
+            tasks_payload = adapter.get_tasks(project_id, bookmark=bookmark)
             tasks = (
                 tasks_payload.get("items", [])
                 if isinstance(tasks_payload, dict)
@@ -36,7 +37,8 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
             if not tasks:
                 return f"No tasks found for {project_label}."
 
-            lines = [f"Found {len(tasks)} task(s) for {project_label}."]
+            page_label = " (paginated via bookmark)" if bookmark else ""
+            lines = [f"Found {len(tasks)} task(s) for {project_label}{page_label}."]
 
             for task in tasks:
                 type_info = task.get("type", {})

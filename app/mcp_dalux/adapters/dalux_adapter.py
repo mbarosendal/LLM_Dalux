@@ -33,10 +33,13 @@ class DaluxAdapter:
 
     # Public methods for GET endpoints related to Tasks
 
-    def get_tasks(self, project_id: str | None = None) -> dict:
-        """GET /5.1/projects/{projectId}/tasks"""
+    def get_tasks(
+        self, project_id: str | None = None, bookmark: str | None = None
+    ) -> dict:
+        """GET /5.1/projects/{projectId}/tasks with optional bookmark pagination."""
         project_id = self.enforce_project_constraints(project_id)
-        payload = self._execute_get(f"/5.1/projects/{project_id}/tasks")
+        params = {"bookmark": bookmark} if bookmark else None
+        payload = self._execute_get(f"/5.1/projects/{project_id}/tasks", params=params)
         payload["items"] = [item["data"] for item in payload["items"]]
         return payload
 
