@@ -4,12 +4,14 @@ import httpx
 from fastmcp import FastMCP
 
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
+from mcp_dalux.policies.tool_policy import ToolPolicy
 
 
 def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     """Register Dalux-related MCP tools."""
 
     @mcp.tool()
+    @ToolPolicy(max_calls=20)
     def get_tasks(project_id: str | None = None):
         """Get all tasks for a project.
         Use this when the user wants to see a list of tasks, or search for a task by name or other attributes.
@@ -20,8 +22,16 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         project_label = project_id or "default project"
         try:
             tasks_payload = adapter.get_tasks(project_id)
-            tasks = tasks_payload.get("items", []) if isinstance(tasks_payload, dict) else []
-            links = tasks_payload.get("links", []) if isinstance(tasks_payload, dict) else []
+            tasks = (
+                tasks_payload.get("items", [])
+                if isinstance(tasks_payload, dict)
+                else []
+            )
+            links = (
+                tasks_payload.get("links", [])
+                if isinstance(tasks_payload, dict)
+                else []
+            )
 
             if not tasks:
                 return f"No tasks found for {project_label}."
@@ -31,9 +41,9 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
             for task in tasks:
                 type_info = task.get("type", {})
                 created_by = task.get("createdBy", {})
-                workflow = task.get("workflow", {})
-                
-                workflow_info = workflow.get("name", {})
+                # workflow = task.get("workflow", {})
+
+                # workflow_info = workflow.get("name", {})
 
                 task_id = task.get("taskId", "N/A")
                 subject = task.get("subject", "No subject")
@@ -67,7 +77,9 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
                     method = link.get("method", "N/A")
                     lines.append(f"rel: {rel} | method: {method} | href: {href}")
 
-            logging.info(f"Successfully fetched {len(tasks)} tasks for {project_label}.")
+            logging.info(
+                f"Successfully fetched {len(tasks)} tasks for {project_label}."
+            )
             return "\n".join(lines)
 
         except ValueError as ve:
@@ -81,8 +93,9 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         except Exception as e:
             logging.error(f"Error fetching tasks for {project_label}: {e}")
             return f"Error fetching tasks for {project_label}: {e}"
-        
+
     @mcp.tool()
+    @ToolPolicy(max_calls=40)
     def get_task(task_id: str):
         """Get detailed info for a specific task by taskId.
         Use this when the user wants to see details about a specific task and you already have the taskId (e.g. from get_tasks).
@@ -107,6 +120,7 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
             return f"Error fetching details for task ID {task_id}: {e}"
 
     @mcp.tool()
+    @ToolPolicy(max_calls=20)
     def get_task_changes(project_id: str | None = None):
         """Get task change events for a project.
         Use this when the user asks about recent task updates, activity history, or change tracking.
@@ -116,8 +130,16 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         project_label = project_id or "default project"
         try:
             changes_payload = adapter.get_task_changes(project_id)
-            changes = changes_payload.get("items", []) if isinstance(changes_payload, dict) else []
-            links = changes_payload.get("links", []) if isinstance(changes_payload, dict) else []
+            changes = (
+                changes_payload.get("items", [])
+                if isinstance(changes_payload, dict)
+                else []
+            )
+            links = (
+                changes_payload.get("links", [])
+                if isinstance(changes_payload, dict)
+                else []
+            )
 
             if not changes:
                 return f"No task changes found for {project_label}."
@@ -136,11 +158,15 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
                     method = link.get("method", "N/A")
                     lines.append(f"rel: {rel} | method: {method} | href: {href}")
 
-            logging.info(f"Successfully fetched {len(changes)} task change event(s) for {project_label}.")
+            logging.info(
+                f"Successfully fetched {len(changes)} task change event(s) for {project_label}."
+            )
             return "\n".join(lines)
 
         except ValueError as ve:
-            logging.warning(f"Value error fetching task changes for {project_label}: {ve}")
+            logging.warning(
+                f"Value error fetching task changes for {project_label}: {ve}"
+            )
             return f"Value error fetching task changes for {project_label}: {ve}"
 
         except httpx.HTTPStatusError as he:
@@ -150,4 +176,3 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         except Exception as e:
             logging.error(f"Error fetching task changes for {project_label}: {e}")
             return f"Error fetching task changes for {project_label}: {e}"
-        

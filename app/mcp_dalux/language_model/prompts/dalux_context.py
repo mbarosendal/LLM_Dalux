@@ -1,7 +1,7 @@
 def build_dalux_context() -> str:
     """
-    Instructions for how to navigate and understand projects on Dalux for the language model.   
-    
+    Instructions for how to navigate and understand projects on Dalux for the language model.
+
     Returns:
         A string with instructions and guidance for the language model on how to understand and navigate Dalux project data.
     """
@@ -23,15 +23,15 @@ def build_dalux_context() -> str:
         - Use filtering, sorting, and summarization to distill large datasets into concise, informative responses. For example, if a user asks about upcoming deadlines, only retrieve tasks due in the next week and summarize their key details rather than listing every task in the project.
         
         """
-    
+
 
 def format_dalux_prompt(prompt: str) -> str:
     """
     Instructions for how to process the user's prompt for the language model.
-    
+
     Args:
         prompt: Raw user input
-    
+
     Returns:
         A string with instructions and guidance for the language model on how to interpret the user's question and determine which Dalux data and API methods are needed to answer it.
     """

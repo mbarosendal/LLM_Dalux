@@ -4,5 +4,11 @@
   "python.terminal.useEnvFile": true,
 
   "editor.insertSpaces": true,
-  "editor.tabSize": 4
+  "editor.tabSize": 4,
+
+    "[python]": {
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "charliermarsh.ruff"
+  },
+  "ruff.fixAll": true,
 }
