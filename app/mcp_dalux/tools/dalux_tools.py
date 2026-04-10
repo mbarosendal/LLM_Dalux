@@ -176,3 +176,72 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         except Exception as e:
             logging.error(f"Error fetching task changes for {project_label}: {e}")
             return f"Error fetching task changes for {project_label}: {e}"
+
+    @mcp.tool()
+    @ToolPolicy(max_calls=20)
+    def get_users(project_id: str | None = None):
+        """Get users for a project.
+        Use this when the user wants to see a list of users in the project, or search for a user by name or other attributes.
+        Returns a list of users with basic info like id, name, etc.
+        The project_id is optional - omit it to use the default configured project. Never ask the user for a projectId.
+        If totalRemainingItems in metadata is greater than 0, that means there are more users than returned in this response - consider using pagination with the links provided to fetch more if needed.
+        For more details on a specific user when you already know the user_id, use get_user(user_id) instead.
+        """
+        project_label = project_id or "default project"
+        try:
+            users_payload = adapter.get_users(project_id)
+            users = (
+                users_payload.get("items", [])
+                if isinstance(users_payload, dict)
+                else []
+            )
+            links = (
+                users_payload.get("links", [])
+                if isinstance(users_payload, dict)
+                else []
+            )
+            metadata = (
+                users_payload.get("metadata", {})
+                if isinstance(users_payload, dict)
+                else {}
+            )
+
+            if not users:
+                return f"No users found for {project_label}."
+
+            lines = [f"Found {len(users)} user(s) for {project_label}."]
+            for user in users:
+                user_id = user.get("userId", "N/A")
+                name = user.get("name", "No name")
+                lines.append(f"userId: {user_id} | name: {name}")
+
+            if links:
+                lines.append("links:")
+                for link in links:
+                    if not isinstance(link, dict):
+                        continue
+                    rel = link.get("rel", "N/A")
+                    href = link.get("href", "N/A")
+                    method = link.get("method", "N/A")
+                    lines.append(f"rel: {rel} | method: {method} | href: {href}")
+
+            if metadata:
+                totalRemainingItems = metadata.get("totalRemainingItems", "N/A")
+                lines.append(f"metadata: totalRemainingItems: {totalRemainingItems}")
+
+            logging.info(
+                f"Successfully fetched {len(users)} users for {project_label}."
+            )
+            return "\n".join(lines)
+
+        except ValueError as ve:
+            logging.warning(f"Value error fetching users for {project_label}: {ve}")
+            return f"Value error fetching users for {project_label}: {ve}"
+
+        except httpx.HTTPStatusError as he:
+            logging.error(f"HTTP error fetching users for {project_label}: {he}")
+            return f"HTTP error fetching users for {project_label}: {he}"
+
+        except Exception as e:
+            logging.error(f"Error fetching users for {project_label}: {e}")
+            return f"Error fetching users for {project_label}: {e}"
