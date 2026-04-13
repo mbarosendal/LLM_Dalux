@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
+
 class Config:
     # Switch to enforce project constraints
     # USE_TEST_MODE = True
@@ -13,6 +14,9 @@ class Config:
     DALUX_BASE_URL = os.getenv("DALUX_BASE_URL")
     DALUX_API_KEY = os.getenv("DALUX_API_KEY")
 
+    # Optional actor context for personal queries. Supports legacy DALUX_USER_ID as fallback.
+    DALUX_ACTOR_USER_ID = os.getenv("DALUX_USER_ID")
+
     @classmethod
     def validate(cls) -> None:
         if not cls.DALUX_BASE_URL:
@@ -20,4 +24,6 @@ class Config:
         if not cls.DALUX_API_KEY:
             raise ValueError("DALUX_API_KEY is not set in the environment variables.")
         if not cls.DALUX_SCOPED_PROJECT_ID:
-            raise ValueError("DALUX_PROJECT_ID is not set in the environment variables.")
+            raise ValueError(
+                "DALUX_PROJECT_ID is not set in the environment variables."
+            )

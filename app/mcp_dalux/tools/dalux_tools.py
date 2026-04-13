@@ -1,52 +1,58 @@
-import logging
-import json
-from datetime import datetime, timezone
-from pathlib import Path
-
-import httpx
 from fastmcp import FastMCP
 
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
+from mcp_dalux.config import Config
 from mcp_dalux.policies.tool_policy import ToolPolicy
-
-
-logger = logging.getLogger(__name__)
-if not logger.handlers:
-    logger.setLevel(logging.INFO)
-    log_path = (
-        Path(__file__).resolve().parents[3] / "json_dumps" / "dalux_tool_debug.log"
-    )
-    file_handler = logging.FileHandler(log_path, mode="a", encoding="utf-8")
-    file_handler.setFormatter(
-        logging.Formatter("%(asctime)s | %(levelname)s | %(message)s")
-    )
-    logger.addHandler(file_handler)
-    logger.propagate = False
-
-
-DEBUG_DUMP_PATH = (
-    Path(__file__).resolve().parents[3] / "json_dumps" / "dalux_tool_debug.log"
+from mcp_dalux.tools.tool_execution import ToolContext, execute_tool
+from mcp_dalux.tools.tool_presenters import make_tool_response
+from mcp_dalux.tools.tool_transformers import (
+    transform_task_changes_collection_payload,
+    transform_task_payload,
+    transform_tasks_collection_payload,
+    transform_user_payload,
+    transform_users_collection_payload,
 )
-
-
-def _dump_tool_debug(tool: str, event: str, payload: dict) -> None:
-    """Append one JSON line with timestamped tool debug payload."""
-    entry = {
-        "timestamp": datetime.now(timezone.utc).isoformat(),
-        "tool": tool,
-        "event": event,
-        "payload": payload,
-    }
-    try:
-        with DEBUG_DUMP_PATH.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(entry, ensure_ascii=False, default=str) + "\n")
-    except Exception:
-        # Debug dumping must never break tool execution.
-        pass
 
 
 def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     """Register Dalux-related MCP tools."""
+
+    @mcp.tool()
+    @ToolPolicy(max_calls=20)
+    def get_actor_context(project_id: str | None = None):
+        """Get actor context for personal queries without calling the Dalux API.
+        Use this when the user asks about "my" tasks/changes and you need the actor userId anchor.
+        The project_id is optional - omit it to use the default configured project.
+        """
+
+        project_label = project_id or "default project"
+
+        def tool_action() -> dict:
+            actor_user_id = Config.DALUX_ACTOR_USER_ID
+            if not actor_user_id:
+                raise ValueError(
+                    "Current user context is not configured (DALUX_USER_ID)."
+                )
+
+            return make_tool_response(
+                tool="get_actor_context",
+                kind="context",
+                project=project_label,
+                summary="Resolved actor context for personal queries.",
+                data={
+                    "actorUserId": actor_user_id,
+                    "projectId": project_id or Config.DALUX_SCOPED_PROJECT_ID,
+                },
+            )
+
+        return execute_tool(
+            ToolContext(
+                tool_name="get_actor_context",
+                project_label=project_label,
+                request_payload={"project_id": project_id},
+            ),
+            tool_action,
+        )
 
     @mcp.tool()
     @ToolPolicy(max_calls=20)
@@ -60,97 +66,34 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         For more details on a specific task when you already know the task_id, use get_task(task_id) instead.
         """
         project_label = project_id or "default project"
-        logger.info("get_tasks called project_id=%r bookmark=%r", project_id, bookmark)
-        _dump_tool_debug(
-            "get_tasks",
-            "request",
-            {"project_id": project_id, "bookmark": bookmark},
-        )
-        try:
+
+        # Inner function passed to execute_tool to handle fetching, transforming, and building the response for the tool.
+        def tool_action() -> dict:
+            # 1) Fetch
             tasks_payload = adapter.get_tasks(project_id, bookmark=bookmark)
-            tasks = (
-                tasks_payload.get("items", [])
-                if isinstance(tasks_payload, dict)
-                else []
+            # 2) Transform (extract, normalize, build)
+            transformed = transform_tasks_collection_payload(
+                tasks_payload, project_label, bookmark
             )
-            links = (
-                tasks_payload.get("links", [])
-                if isinstance(tasks_payload, dict)
-                else []
-            )
-
-            if not tasks:
-                return f"No tasks found for {project_label}."
-
-            page_label = " (paginated via bookmark)" if bookmark else ""
-            lines = [f"Found {len(tasks)} task(s) for {project_label}{page_label}."]
-
-            for task in tasks:
-                type_info = task.get("type", {})
-                created_by = task.get("createdBy", {})
-                # workflow = task.get("workflow", {})
-
-                # workflow_info = workflow.get("name", {})
-
-                task_id = task.get("taskId", "N/A")
-                subject = task.get("subject", "No subject")
-                # usage = task.get("usage", "N/A") # double with type.name?
-                type_name = type_info.get("name", "N/A")
-                number = task.get("number", "N/A")
-                created = task.get("created", "N/A")
-                created_by_user_id = created_by.get("userId", "N/A")
-
-                lines.append(
-                    " | ".join(
-                        [
-                            f"taskId: {task_id}",
-                            f"subject: {subject}",
-                            # f"usage: {usage}",
-                            f"typeName: {type_name}",
-                            f"number: {number}",
-                            f"created: {created}",
-                            f"createdByUserId: {created_by_user_id}",
-                        ]
-                    )
-                )
-
-            if links:
-                lines.append("links:")
-                for link in links:
-                    if not isinstance(link, dict):
-                        continue
-                    rel = link.get("rel", "N/A")
-                    href = link.get("href", "N/A")
-                    method = link.get("method", "N/A")
-                    lines.append(f"rel: {rel} | method: {method} | href: {href}")
-
-            _dump_tool_debug(
-                "get_tasks",
-                "response",
-                {
-                    "project": project_label,
-                    "bookmark": bookmark,
-                    "task_count": len(tasks),
-                    "link_count": len(links),
-                },
+            # 3) Build
+            return make_tool_response(
+                tool="get_tasks",
+                kind="collection",
+                project=project_label,
+                summary=transformed["summary"],
+                data=transformed["data"],
+                links=transformed["links"],
+                metadata=transformed["metadata"],
             )
 
-            logging.info(
-                f"Successfully fetched {len(tasks)} tasks for {project_label}."
-            )
-            return "\n".join(lines)
-
-        except ValueError as ve:
-            logging.warning(f"Value error fetching tasks for {project_label}: {ve}")
-            return f"Value error fetching tasks for {project_label}: {ve}"
-
-        except httpx.HTTPStatusError as he:
-            logging.error(f"HTTP error fetching tasks for {project_label}: {he}")
-            return f"HTTP error fetching tasks for {project_label}: {he}"
-
-        except Exception as e:
-            logging.error(f"Error fetching tasks for {project_label}: {e}")
-            return f"Error fetching tasks for {project_label}: {e}"
+        return execute_tool(
+            ToolContext(
+                tool_name="get_tasks",
+                project_label=project_label,
+                request_payload={"project_id": project_id, "bookmark": bookmark},
+            ),
+            tool_action,
+        )
 
     @mcp.tool()
     @ToolPolicy(max_calls=40)
@@ -160,22 +103,27 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         Returns detailed info about the task, including all available fields.
         For a broader search or list of tasks, use get_tasks() instead.
         """
-        try:
+        project_label = "default project"
+
+        def tool_action() -> dict:
             task = adapter.get_task(task_id)
-            logging.info(f"Successfully fetched details for task ID {task_id}.")
-            return f"Details for task ID {task_id}:\n{task}"
+            transformed = transform_task_payload(task, task_id, project_label)
+            return make_tool_response(
+                tool="get_task",
+                kind="detail",
+                project=project_label,
+                summary=transformed["summary"],
+                data=transformed["data"],
+            )
 
-        except ValueError as ve:
-            logging.warning(f"Value error fetching details for task ID {task_id}: {ve}")
-            return f"Value error fetching details for task ID {task_id}: {ve}"
-
-        except httpx.HTTPStatusError as he:
-            logging.error(f"HTTP error fetching details for task ID {task_id}: {he}")
-            return f"HTTP error fetching details for task ID {task_id}: {he}"
-
-        except Exception as e:
-            logging.error(f"Error fetching details for task ID {task_id}: {e}")
-            return f"Error fetching details for task ID {task_id}: {e}"
+        return execute_tool(
+            ToolContext(
+                tool_name="get_task",
+                project_label=project_label,
+                request_payload={"task_id": task_id},
+            ),
+            tool_action,
+        )
 
     @mcp.tool()
     @ToolPolicy(max_calls=20)
@@ -198,7 +146,7 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
 
         Status vocabulary (normalized):
         Types of closed status:
-        - Approved. with follow up (Godkendt, med opfølgning)
+        - Approved with follow up (Godkendt, med opfølgning)
         - Approved (Godkendt)
         - Expired (Udgået)
         Types of open status:
@@ -209,166 +157,31 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         - Unknown (Ukendt)
         """
 
-        def infer_status(
-            action: str | None, status: str | None, has_description: bool
-        ) -> str:
-            action_value = (action or "").strip().lower()
-            status_value = (status or "").strip().lower()
-
-            # Action is the strongest signal in this payload shape.
-            if action_value == "approve":
-                return (
-                    "approved_with_follow_up" if has_description else "approved"
-                )  # maybe if not has_status instead?
-            if action_value == "assign":
-                return "ongoing"
-            if action_value == "reject":
-                return "rejected"
-            if action_value == "complete":
-                return "ready"
-            if action_value == "other":
-                return "expired"
-
-            # Status is only a fallback when action is missing or unfamiliar.
-            if status_value == "closed":
-                return "unknown"
-            if status_value == "open":
-                return "unknown"
-
-            return "unknown"
-
         project_label = project_id or "default project"
-        _dump_tool_debug(
-            "get_task_changes",
-            "request",
-            {"project_id": project_id, "bookmark": bookmark},
-        )
 
-        try:
+        def tool_action() -> dict:
             changes_payload = adapter.get_task_changes(project_id, bookmark=bookmark)
-            changes = (
-                changes_payload.get("items", [])
-                if isinstance(changes_payload, dict)
-                else []
+            transformed = transform_task_changes_collection_payload(
+                changes_payload, project_label
             )
-            links = (
-                changes_payload.get("links", [])
-                if isinstance(changes_payload, dict)
-                else []
+            return make_tool_response(
+                tool="get_task_changes",
+                kind="analysis",
+                project=project_label,
+                summary=transformed["summary"],
+                data=transformed["data"],
+                links=transformed["links"],
+                metadata=transformed["metadata"],
             )
 
-            if not changes:
-                return {
-                    "project": project_label,
-                    "items": [],
-                    "taskSummaries": [],
-                    "links": links,
-                }
-
-            enriched_items = []
-            task_latest: dict[str, dict] = {}
-
-            for change in changes:
-                if not isinstance(change, dict):
-                    continue
-
-                fields = change.get("fields", {}) or {}
-
-                action = change.get("action")
-                status = fields.get("status")
-                description = change.get("description") or ""
-
-                inferred = infer_status(
-                    action if isinstance(action, str) else None,
-                    status if isinstance(status, str) else None,
-                    bool(description),
-                )
-
-                _dump_tool_debug(
-                    "get_task_changes",
-                    "inferred_status",
-                    {
-                        "taskId": change.get("taskId"),
-                        "timestamp": change.get("timestamp"),
-                        "action": action,
-                        "status": status,
-                        "inferredStatus": inferred,
-                    },
-                )
-
-                item = {
-                    "taskId": change.get("taskId"),
-                    "timestamp": change.get("timestamp"),
-                    "action": action,
-                    "status": status,
-                    "inferredStatus": inferred,
-                    "description": description,
-                    "modifiedByUserId": (fields.get("modifiedBy") or {}).get("userId"),
-                    "assignedToRoleId": (fields.get("assignedTo") or {}).get("roleId"),
-                    "assignedToRoleName": (fields.get("assignedTo") or {}).get(
-                        "roleName"
-                    ),
-                    "currentResponsibleUserId": (
-                        fields.get("currentResponsible") or {}
-                    ).get("userId"),
-                    "rawChange": change,  # keep for deep inspection if needed
-                }
-
-                enriched_items.append(item)
-
-                # Track latest event per taskId
-                task_id = item["taskId"]
-                timestamp = item["timestamp"]
-
-                if task_id:
-                    if task_id not in task_latest:
-                        task_latest[task_id] = item
-                    else:
-                        # compare timestamps (string compare works)
-                        if (
-                            timestamp
-                            and task_latest[task_id].get("timestamp")
-                            and timestamp > task_latest[task_id]["timestamp"]
-                        ):
-                            task_latest[task_id] = item
-
-            # Build task-level summaries (final state per task)
-            task_summaries = []
-            for task_id, latest in task_latest.items():
-                task_summaries.append(
-                    {
-                        "taskId": task_id,
-                        "finalStatus": latest.get("inferredStatus", "unknown"),
-                        "latestTimestamp": latest.get("timestamp"),
-                        "assignedToRoleId": latest.get("assignedToRoleId"),
-                        "assignedToRoleName": latest.get("assignedToRoleName"),
-                        "currentResponsibleUserId": latest.get(
-                            "currentResponsibleUserId"
-                        ),
-                    }
-                )
-
-            return {
-                "project": project_label,
-                "items": enriched_items,
-                "taskSummaries": task_summaries,
-                "links": links,
-            }
-
-        except Exception as e:
-            _dump_tool_debug(
-                "get_task_changes",
-                "error",
-                {
-                    "project": project_label,
-                    "bookmark": bookmark,
-                    "error": str(e),
-                },
-            )
-            return {
-                "error": f"Failed to fetch task changes for {project_label}",
-                "details": str(e),
-            }
+        return execute_tool(
+            ToolContext(
+                tool_name="get_task_changes",
+                project_label=project_label,
+                request_payload={"project_id": project_id, "bookmark": bookmark},
+            ),
+            tool_action,
+        )
 
     @mcp.tool()
     @ToolPolicy(max_calls=20)
@@ -381,70 +194,30 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         For more details on a specific user when you already know the user_id, use get_user(user_id) instead.
         """
         project_label = project_id or "default project"
-        try:
+
+        def tool_action() -> dict:
             users_payload = adapter.get_users(project_id)
-            users = (
-                users_payload.get("items", [])
-                if isinstance(users_payload, dict)
-                else []
+            transformed = transform_users_collection_payload(
+                users_payload, project_label
             )
-            links = (
-                users_payload.get("links", [])
-                if isinstance(users_payload, dict)
-                else []
-            )
-            metadata = (
-                users_payload.get("metadata", {})
-                if isinstance(users_payload, dict)
-                else {}
+            return make_tool_response(
+                tool="get_users",
+                kind="collection",
+                project=project_label,
+                summary=transformed["summary"],
+                data=transformed["data"],
+                links=transformed["links"],
+                metadata=transformed["metadata"],
             )
 
-            if not users:
-                return f"No users found for {project_label}."
-
-            lines = [f"Found {len(users)} user(s) for {project_label}."]
-            for user in users:
-                user_id = user.get("userId", "N/A")
-                first_name = user.get("firstName", "No name")
-                last_name = user.get("lastName", "")
-                name = f"{first_name} {last_name}".strip()
-                email = user.get("email", "N/A")
-                company_id = user.get("companyId", "N/A")
-
-                lines.append(
-                    f"userId: {user_id} | name: {name} | email: {email} | companyId: {company_id}"
-                )
-
-            if links:
-                lines.append("links:")
-                for link in links:
-                    if not isinstance(link, dict):
-                        continue
-                    rel = link.get("rel", "N/A")
-                    href = link.get("href", "N/A")
-                    method = link.get("method", "N/A")
-                    lines.append(f"rel: {rel} | method: {method} | href: {href}")
-
-            if metadata:
-                totalRemainingItems = metadata.get("totalRemainingItems", "N/A")
-                lines.append(f"metadata: totalRemainingItems: {totalRemainingItems}")
-
-            logging.info(
-                f"Successfully fetched {len(users)} users for {project_label}."
-            )
-            return "\n".join(lines)
-
-        except ValueError as ve:
-            logging.warning(f"Value error fetching users for {project_label}: {ve}")
-            return f"Value error fetching users for {project_label}: {ve}"
-
-        except httpx.HTTPStatusError as he:
-            logging.error(f"HTTP error fetching users for {project_label}: {he}")
-            return f"HTTP error fetching users for {project_label}: {he}"
-
-        except Exception as e:
-            logging.error(f"Error fetching users for {project_label}: {e}")
-            return f"Error fetching users for {project_label}: {e}"
+        return execute_tool(
+            ToolContext(
+                tool_name="get_users",
+                project_label=project_label,
+                request_payload={"project_id": project_id},
+            ),
+            tool_action,
+        )
 
     @mcp.tool()
     @ToolPolicy(max_calls=20)
@@ -456,41 +229,23 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         For a broader search or list of users, use get_users() instead.
         """
         project_label = project_id or "default project"
-        try:
+
+        def tool_action() -> dict:
             user_data = adapter.get_user(user_id, project_id)
-
-            if not isinstance(user_data, dict) or not user_data:
-                return f"No user found for userId {user_id} in {project_label}."
-
-            first_name = user_data.get("firstName", "")
-            last_name = user_data.get("lastName", "")
-            name = f"{first_name} {last_name}".strip() or "No name"
-            email = user_data.get("email", "N/A")
-            company_id = user_data.get("companyId", "N/A")
-
-            lines = [f"Found user for {project_label}."]
-            lines.append(
-                " | ".join(
-                    [
-                        f"userId: {user_data.get('userId', 'N/A')}",
-                        f"name: {name}",
-                        f"email: {email}",
-                        f"companyId: {company_id}",
-                    ]
-                )
+            transformed = transform_user_payload(user_data, user_id, project_label)
+            return make_tool_response(
+                tool="get_user",
+                kind="detail",
+                project=project_label,
+                summary=transformed["summary"],
+                data=transformed["data"],
             )
 
-            logging.info(f"Successfully fetched details for user ID {user_id}.")
-            return "\n".join(lines)
-
-        except ValueError as ve:
-            logging.warning(f"Value error fetching details for user ID {user_id}: {ve}")
-            return f"Value error fetching details for user ID {user_id}: {ve}"
-
-        except httpx.HTTPStatusError as he:
-            logging.error(f"HTTP error fetching details for user ID {user_id}: {he}")
-            return f"HTTP error fetching details for user ID {user_id}: {he}"
-
-        except Exception as e:
-            logging.error(f"Error fetching details for user ID {user_id}: {e}")
-            return f"Error fetching details for user ID {user_id}: {e}"
+        return execute_tool(
+            ToolContext(
+                tool_name="get_user",
+                project_label=project_label,
+                request_payload={"user_id": user_id, "project_id": project_id},
+            ),
+            tool_action,
+        )
