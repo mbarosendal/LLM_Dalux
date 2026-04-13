@@ -27,3 +27,5 @@ class Config:
             raise ValueError(
                 "DALUX_PROJECT_ID is not set in the environment variables."
             )
+        if not cls.DALUX_USER_ID:
+            raise ValueError("DALUX_USER_ID is not set in the environment variables.")
