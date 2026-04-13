@@ -19,35 +19,35 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
 
     @mcp.tool()
     @ToolPolicy(max_calls=20)
-    def get_actor_context(project_id: str | None = None):
-        """Get actor context for personal queries without calling the Dalux API.
-        Use this when the user asks about "my" tasks/changes and you need the actor userId anchor.
+    def get_current_user_context(project_id: str | None = None):
+        """Get user context for personal queries without calling the Dalux API.
+        Use this when the user asks about "my" tasks/changes and you need their userId anchor.
         The project_id is optional - omit it to use the default configured project.
         """
 
         project_label = project_id or "default project"
 
         def tool_action() -> dict:
-            actor_user_id = Config.DALUX_ACTOR_USER_ID
-            if not actor_user_id:
+            user_id = Config.DALUX_USER_ID
+            if not user_id:
                 raise ValueError(
                     "Current user context is not configured (DALUX_USER_ID)."
                 )
 
             return make_tool_response(
-                tool="get_actor_context",
+                tool="get_current_user_context",
                 kind="context",
                 project=project_label,
-                summary="Resolved actor context for personal queries.",
+                summary="Resolved user context for personal queries.",
                 data={
-                    "actorUserId": actor_user_id,
+                    "userId": user_id,
                     "projectId": project_id or Config.DALUX_SCOPED_PROJECT_ID,
                 },
             )
 
         return execute_tool(
             ToolContext(
-                tool_name="get_actor_context",
+                tool_name="get_current_user_context",
                 project_label=project_label,
                 request_payload={"project_id": project_id},
             ),

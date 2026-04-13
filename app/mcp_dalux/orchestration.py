@@ -9,7 +9,7 @@ from mcp_dalux.tools.dalux_tools import register_dalux_tools
 
 def _build_runtime_instructions() -> str:
     """Append the static system prompt with dynamic, runtime context."""
-    actor_user_id = Config.DALUX_ACTOR_USER_ID
+    actor_user_id = Config.DALUX_USER_ID
 
     if not actor_user_id:
         return SYSTEM_PROMPT

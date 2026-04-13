@@ -15,7 +15,7 @@ class Config:
     DALUX_API_KEY = os.getenv("DALUX_API_KEY")
 
     # Optional actor context for personal queries. Supports legacy DALUX_USER_ID as fallback.
-    DALUX_ACTOR_USER_ID = os.getenv("DALUX_USER_ID")
+    DALUX_USER_ID = os.getenv("DALUX_USER_ID")
 
     @classmethod
     def validate(cls) -> None:
