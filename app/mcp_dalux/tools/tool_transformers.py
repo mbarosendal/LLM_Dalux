@@ -70,7 +70,7 @@ def infer_task_change_status(
         return "approved, with follow up"
     if action_value == "approve" and status_value == "closed":
         return "approved"
-    # if action_value == "assign" and has_description:
+    # if action_value == "assign" and has_description: # and has fields.userdefinedfields.items.name == sikkerhedskategori?
     #     return "new"
     if action_value == "assign" and status_value == "open":
         return "ongoing"
@@ -80,6 +80,8 @@ def infer_task_change_status(
         return "rejected"
     if action_value == "complete" and status_value == "open":
         return "ready"
+    # if action_value == "other" and status_value == "closed":
+    #     return "archived"
     if action_value == "other" and status_value == "closed":
         return "expired"
     if status_value in {"closed", "open"}:
