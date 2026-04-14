@@ -1,4 +1,6 @@
 from __future__ import annotations
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # Extractor methods
 
@@ -44,17 +46,28 @@ def _normalize_user_object(user: dict) -> dict:
 def _normalize_task_object(task: dict) -> dict:
     type_info = task.get("type") or {}
     created_by = task.get("createdBy") or {}
+
     return {
         "taskId": task.get("taskId", "N/A"),
         "subject": task.get("subject", "No subject"),
         "typeName": type_info.get("name", "N/A"),
         "number": task.get("number", "N/A"),
-        "created": task.get("created", "N/A"),
+        "created": convert_to_danish_time(task.get("created", "N/A")),
         "createdByUserId": created_by.get("userId", "N/A"),
     }
 
 
 # Helper methods
+
+
+def convert_to_danish_time(iso_timestamp: str) -> str:
+    try:
+        dt = datetime.fromisoformat(iso_timestamp)
+        danish_dt = dt.astimezone(ZoneInfo("Europe/Copenhagen"))
+        return danish_dt.isoformat()
+    except Exception as e:
+        print(f"Error converting timestamp: {e}")
+        return iso_timestamp
 
 
 def infer_task_change_status(
@@ -113,7 +126,7 @@ def _find_latest_change(item: dict, task_latest: dict[str, dict]) -> None:
         task_latest[task_id] = item
         return
 
-    # New item wins if timestamp is newer, or same timestamp but higher status priority (closed > open).
+    # New item wins if timestamp is newer, or if same timestamp but higher status priority (closed > open).
     if timestamp > old_timestamp or (
         timestamp == old_timestamp
         and _status_priority(item) >= _status_priority(existing)
@@ -186,7 +199,8 @@ def transform_task_changes_collection_payload(
 
         item = {
             "taskId": change.get("taskId"),
-            "timestamp": change.get("timestamp"),
+            # "timestamp": dk,
+            "timestamp": convert_to_danish_time(change.get("timestamp")),
             "action": action,
             "status": status,
             "inferredStatus": inferred,

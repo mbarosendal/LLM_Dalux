@@ -7,6 +7,8 @@ from mcp_dalux.tools.dalux_tools import register_dalux_tools
 # Setup
 
 
+# Make a prompt or instruction class to retrieve system_prompt and tool definitions instead of setting here
+# add params: category, project_id, user_id (for better context and routing decisions)
 def _build_runtime_instructions() -> str:
     """Append the static system prompt with dynamic, runtime context."""
     actor_user_id = Config.DALUX_USER_ID
@@ -31,12 +33,15 @@ mcp = FastMCP(
 )
 _adapter = DaluxAdapter()
 
+# Runtime (startSession()) should branch orchestration:
+# Params:
+# - environment = developer | live (stdio | websocket)
+# - category = tasks | files | users (for better routing and context, register relevant tool per category, and maybe append custom system_prompt)
+# - project_id = for better context and routing decisions, but also to enforce project constraints early
+# - user_id = for better context and routing decisions, but also to enforce test user constraints early (if needed)
+# - Other stretch goals, like API or LLM...
+
+# Process input from user (sanitize, validate, and extract relevant params for orchestration decisions)
+# Return response to user (in a consistent format, maybe with a summary and data section, and maybe with links and metadata if relevant for the tool response)
+
 register_dalux_tools(mcp, _adapter)
-
-# Process input from user
-# Branch logic (API, LLM, etc.)
-# Return response to user
-
-
-# if __name__ == "__main__":
-#     register_dalux_tools(mcp, _adapter)
