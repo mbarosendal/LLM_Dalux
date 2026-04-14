@@ -3,7 +3,6 @@ from mcp_dalux.config import Config
 
 
 class DaluxAdapter:
-    # Constructor retrieves config values, headers, and initializes HTTP client
     def __init__(self):
         self._scoped_project_id = Config.DALUX_SCOPED_PROJECT_ID
         self._use_test_project = Config.IS_TEST_PROJECT_ONLY
