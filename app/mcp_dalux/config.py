@@ -14,7 +14,7 @@ class Config:
     DALUX_BASE_URL = os.getenv("DALUX_BASE_URL")
     DALUX_API_KEY = os.getenv("DALUX_API_KEY")
 
-    # Optional actor context for personal queries. Supports legacy DALUX_USER_ID as fallback.
+    # Optional actor context for personal queries.
     DALUX_USER_ID = os.getenv("DALUX_USER_ID")
 
     @classmethod

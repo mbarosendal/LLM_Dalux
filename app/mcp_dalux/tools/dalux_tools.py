@@ -153,10 +153,11 @@ def register_dalux_tools(mcp: FastMCP, adapter: DaluxAdapter) -> None:
         - Rejected (Afvist)
         - Ongoing (Igangværende)
         - Ready (Klarmeldt)
+        - New (Ny) - not implemented
+        - Archived (Arkiveret) - not implemented
         And a fallback status:
         - Unknown (Ukendt)
         """
-
         project_label = project_id or "default project"
 
         def tool_action() -> dict:

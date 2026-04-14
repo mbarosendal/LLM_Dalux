@@ -66,41 +66,55 @@ def infer_task_change_status(
     action_value = (action or "").strip().lower()
     status_value = (status or "").strip().lower()
 
-    if action_value == "approve":
-        return "approved_with_follow_up" if has_description else "approved"
-    if action_value == "assign":
+    if action_value == "approve" and has_description:
+        return "approved, with follow up"
+    if action_value == "approve" and status_value == "closed":
+        return "approved"
+    # if action_value == "assign" and has_description:
+    #     return "new"
+    if action_value == "assign" and status_value == "open":
         return "ongoing"
-    if action_value == "reject":
+    if action_value == "update" and has_description:
+        return "ongoing"  # + ", with follow up" ?
+    if action_value == "reject" and status_value == "open":
         return "rejected"
-    if action_value == "complete":
+    if action_value == "complete" and status_value == "open":
         return "ready"
-    if action_value == "other":
+    if action_value == "other" and status_value == "closed":
         return "expired"
     if status_value in {"closed", "open"}:
         return "unknown"
     return "unknown"
 
 
-def _find_latest_change(
-    item: dict,
-    task_latest: dict[str, dict],
-) -> None:
-    """Apply latest-change selection logic for keeping the latest event per task."""
-    # Map taskId to its latest change based on timestamp for quick lookup when building summaries
-    task_id = item["taskId"]
-    timestamp = item["timestamp"]
+def _status_priority(item: dict) -> int:
+    status = (item.get("status") or item.get("fields", {}).get("status") or "").lower()
+    return 2 if status == "closed" else 1 if status == "open" else 0
 
-    if task_id and (
-        # If we have never seen this task_id before, store it
-        task_id not in task_latest
-        # If we have seen it before, compare timestamps
-        or (
-            # Only compare if both timestamps are present and valid strings
-            timestamp
-            and task_latest[task_id].get("timestamp")
-            # Compare + If the current item is newer, replace the old one
-            and timestamp > task_latest[task_id]["timestamp"]
-        )
+
+def _find_latest_change(item: dict, task_latest: dict[str, dict]) -> None:
+    task_id = item.get("taskId")
+    timestamp = item.get("timestamp")
+
+    if not task_id or not timestamp:
+        return
+
+    existing = task_latest.get(task_id)
+
+    # First time we see this new task
+    if not existing:
+        task_latest[task_id] = item
+        return
+
+    old_timestamp = existing.get("timestamp")
+    if not old_timestamp:
+        task_latest[task_id] = item
+        return
+
+    # New item wins if timestamp is newer, or same timestamp but higher status priority (closed > open).
+    if timestamp > old_timestamp or (
+        timestamp == old_timestamp
+        and _status_priority(item) >= _status_priority(existing)
     ):
         task_latest[task_id] = item
 
