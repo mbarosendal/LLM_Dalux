@@ -102,15 +102,15 @@ def register_dalux_tools_tasks(mcp: FastMCP, adapter: DaluxAdapter) -> None:
 
         Status vocabulary (normalized):
         Types of closed status:
-        - Approved with follow up (Godkendt, med opfølgning)
-        - Approved (Godkendt)
-        - Expired (Udgået)
+        - 🟢 Approved with follow up (Godkendt, med opfølgning)
+        - 🟢 Approved (Godkendt)
+        - ⚫ Expired (Udgået)
         Types of open status:
         - Rejected (Afvist)
-        - Ongoing (Igangværende)
+        - 🟠 Ongoing (Igangværende)
         - Ready (Klarmeldt)
-        - New (Ny) - not implemented
-        - Archived (Arkiveret) - not implemented
+        - 🔴 New (Ny) - not implemented!
+        - ⚫ Archived (Arkiveret) - not implemented!
         And a fallback status:
         - Unknown (Ukendt)
         """
