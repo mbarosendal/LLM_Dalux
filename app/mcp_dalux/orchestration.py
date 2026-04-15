@@ -14,6 +14,8 @@ from mcp_dalux.language_model.instructions.user_context import USER_CONTEXT_TEMP
 from mcp_dalux.tools.dalux_tools_tasks import register_dalux_tools_tasks
 from mcp_dalux.tools.dalux_tools_users import register_dalux_tools_users
 
+# MVP1 DONE
+
 
 @dataclass(slots=True)
 class SessionContext:
