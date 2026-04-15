@@ -17,13 +17,26 @@ def register_dalux_tools_tasks(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     @mcp.tool()
     @ToolPolicy(max_calls=20)
     def get_tasks(project_id: str | None = None, bookmark: str | None = None):
-        """Get all tasks for a project.
-        Use this when the user wants to see a list of tasks, or search for a task by name or other attributes.
-        If user asks about staus of task(s), use get_task_changes() instead which is designed for that and provides richer info for status inference.
-        Returns a list of tasks, each with basic info like id, name, status (open or not), etc.
-        The project_id is optional - omit it to use the default configured project. Never ask the user for a projectId.
-        The bookmark is optional - use it to request the next page from a previous response's nextPage link if needed. For pagination, pass only the bookmark token value (example: 63176033328), not /?bookmark=... and not a full URL.
-        For more details on a specific task when you already know the task_id, use get_task(task_id) instead.
+        """List tasks for discovery and filtering.
+
+        Use when the user asks for task overviews, counts, or keyword/type searches.
+        Returns lightweight task fields only (taskId, subject, typeName, number, created, createdByUserId).
+
+        Tool choice:
+        - For current/final status questions, prefer get_task_changes.
+        - For one known taskId, use get_task.
+
+        Privacy rule:
+        - Do not expose internal IDs (taskId, createdByUserId) unless the user explicitly asks.
+        - If asked, look up actual user details (name, email) using get_user and present these to the user instead.
+
+        Examples:
+        - "Show all safety observations from this week"
+        - "Find tasks about cleanup"
+
+        Parameters:
+        - project_id is optional; omit to use the default scoped project.
+        - bookmark is optional for pagination. Pass only the token from links.nextPage.
         """
         project_label = project_id or "default project"
 
@@ -54,10 +67,20 @@ def register_dalux_tools_tasks(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     @mcp.tool()
     @ToolPolicy(max_calls=40)
     def get_task(task_id: str):
-        """Get detailed info for a specific task by taskId.
-        Use this when the user wants to see details about a specific task and you already have the taskId (e.g. from get_tasks).
-        Returns detailed info about the task, including all available fields.
-        For a broader search or list of tasks, use get_tasks() instead.
+        """Get one task by known taskId.
+
+        Use when the user references a specific task number/ID and you need a single-task lookup.
+        Current output is a single lightweight task object with the same core fields as get_tasks.
+
+        Tool choice:
+        - For broad discovery/search, use get_tasks.
+        - For status timeline or final status, use get_task_changes.
+
+        Privacy rule:
+        - Do not expose internal IDs unless explicitly requested.
+
+        Example:
+        - "Open task SO2"
         """
         project_label = "default project"
 
@@ -85,27 +108,37 @@ def register_dalux_tools_tasks(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     @ToolPolicy(max_calls=20)
     def get_task_changes(project_id: str | None = None, bookmark: str | None = None):
         """
-        Get task change events and inferred task statuses for a project.
+        Get task change events with inferred status, optimized for status answers.
 
-        Pagination:
-        - `bookmark` is optional and used to fetch the next page.
-        - Pass only the bookmark token value from a prior `links` nextPage URL.
+        Use this as the primary tool for questions about progress, open vs closed, and final status.
 
-        Returns structured data with:
-        - items: raw change events enriched with inferredStatus
-        - taskSummaries: one entry per taskId with the FINAL inferred status
+        Returns:
+        - items: event-level history (timestamp, action, description, responsibility)
+        - taskSummaries: one row per taskId with finalStatus and latestTimestamp
 
         Rules for LLM usage:
-        - ALWAYS use `taskSummaries` when answering questions about task status.
-        - `inferredStatus` is authoritative - do NOT re-infer unless it is "unknown".
-        - Use `items` only for deeper inspection (e.g. timestamps, descriptions, responsibility).
+        - For status answers, use taskSummaries as the source of truth.
+        - Use items only when the user asks for timeline/details.
+        - Do not re-infer status if inferredStatus/finalStatus is present.
 
-        Status vocabulary (normalized):
-        Types of closed status:
+        Privacy rule:
+        - Keep role/user/task IDs out of user-facing text unless explicitly requested.
+
+        Examples:
+        - "Which tasks are still ongoing?"
+        - "How many tasks were approved this week?"
+        - "Show the status timeline for SO2"
+
+        Pagination:
+        - bookmark is optional and used to fetch the next page.
+        - Pass only the bookmark token from links.nextPage.
+
+        Normalized status values and color codes:
+        Closed status types:
         - 🟢 Approved with follow up (Godkendt, med opfølgning)
         - 🟢 Approved (Godkendt)
-        - ⚫ Expired (Udgået)
-        Types of open status:
+        # - ⚫ Expired (Udgået)
+        Open status types:
         - Rejected (Afvist)
         - 🟠 Ongoing (Igangværende)
         - Ready (Klarmeldt)

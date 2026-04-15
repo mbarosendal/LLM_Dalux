@@ -17,9 +17,19 @@ def register_dalux_tools_users(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     @mcp.tool()
     @ToolPolicy(max_calls=20)
     def get_current_user_context(project_id: str | None = None):
-        """Get user context for personal queries without calling the Dalux API.
-        Use this when the user asks about "my" tasks/changes and you need their userId anchor.
-        The project_id is optional - omit it to use the default configured project.
+        """Resolve the current user anchor for personal queries.
+
+        Use first when the user asks about "my" tasks/changes.
+        Returns the actor userId (and scoped projectId) used to ground "me/my/mine" requests.
+
+        Tool choice:
+        - Run this before filtering task or user results to the current user.
+
+        Privacy rule:
+        - Use returned IDs internally; avoid exposing them unless explicitly requested.
+
+        Parameter:
+        - project_id is optional; omit to use the default scoped project.
         """
 
         project_label = project_id or "default project"
@@ -54,12 +64,19 @@ def register_dalux_tools_users(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     @mcp.tool()
     @ToolPolicy(max_calls=20)
     def get_users(project_id: str | None = None):
-        """Get users for a project.
-        Use this when the user wants to see a list of users in the project, or search for a user by name or other attributes.
-        Returns a list of users with basic info like id, name, etc.
-        The project_id is optional - omit it to use the default configured project. Never ask the user for a projectId.
-        If totalRemainingItems in metadata is greater than 0, that means there are more users than returned in this response - consider using pagination with the links provided to fetch more if needed.
-        For more details on a specific user when you already know the user_id, use get_user(user_id) instead.
+        """List users for lookup and matching.
+
+        Use when the user asks to find people by name/company or to see project participants.
+        Returns a collection of basic user fields (userId, name, email, companyId).
+
+        Tool choice:
+        - Use get_user only when a specific userId is already known.
+
+        Privacy rule:
+        - Avoid exposing internal IDs by default.
+
+        Parameter:
+        - project_id is optional; omit to use the default scoped project.
         """
         project_label = project_id or "default project"
 
@@ -90,11 +107,19 @@ def register_dalux_tools_users(mcp: FastMCP, adapter: DaluxAdapter) -> None:
     @mcp.tool()
     @ToolPolicy(max_calls=20)
     def get_user(user_id: str, project_id: str | None = None):
-        """Get detailed info for a specific user on a project by userId.
-        Use this when the user wants to see details (name, email, etc.) about a specific user and you already have the userId.
-        This does not provide additional information about a specific user compared to what is available in get_users().
-        Returns user info from the endpoint data object.
-        For a broader search or list of users, use get_users() instead.
+        """Get one user by known userId.
+
+        Use when userId is already known and you need a single-user lookup.
+        Current output is equivalent to user fields available in get_users.
+
+        Tool choice:
+        - For discovery or name matching, use get_users.
+
+        Privacy rule:
+        - Keep userId internal unless explicitly requested.
+
+        Example:
+        - "Show details for this user ID"
         """
         project_label = project_id or "default project"
 
