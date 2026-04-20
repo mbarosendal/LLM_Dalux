@@ -103,6 +103,26 @@ def test_live_get_user_smoke():
     assert result.get("userId") == user_id
 
 
+def test_live_get_workpackages_smoke():
+    adapter = DaluxAdapter()
+    try:
+        result = adapter.get_workpackages()
+        items = result.get("items", []) if isinstance(result, dict) else []
+        if not items:
+            pytest.skip(
+                "No workpackages found in the project; cannot verify get_workpackages response shape."
+            )
+    finally:
+        adapter._client.close()
+
+    assert isinstance(result, dict)
+    assert "items" in result
+    assert isinstance(items, list)
+    if items:
+        assert isinstance(result["items"][0], dict)
+
+        
+
 # def test_live_get_task_attachments_smoke():
 #     adapter = DaluxAdapter()
 #     try:
