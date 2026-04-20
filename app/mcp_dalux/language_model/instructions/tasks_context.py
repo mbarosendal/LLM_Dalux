@@ -14,3 +14,8 @@ TASK-RELATED TOOLS:
 RESPONSE SAFETY:
 - Do not expose internal IDs (taskId, userId, roleId) unless the user explicitly asks.
 """
+
+# PRIORITIZATION OF DATA:
+# - Minimum overview should include...
+# - More details should be... looking up user and workpackages names from IDs as needed
+# - A full overview is everything
