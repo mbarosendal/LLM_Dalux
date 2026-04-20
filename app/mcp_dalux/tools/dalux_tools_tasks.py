@@ -64,45 +64,46 @@ def register_dalux_tools_tasks(mcp: FastMCP, adapter: DaluxAdapter) -> None:
             tool_action,
         )
 
-    @mcp.tool()
-    @ToolPolicy(max_calls=40)
-    def get_task(task_id: str):
-        """Get one task by known taskId.
+    # Endpoint for a single task does not actually provide much more value than the collection endpoint with filters, and it adds complexity and risk around taskId usage, so we will skip it for now and add if needed based on user feedback.
+    # @mcp.tool()
+    # @ToolPolicy(max_calls=40)
+    # def get_task(task_id: str):
+    #     """Get one task by known taskId.
 
-        Use when the user references a specific task number/ID and you need a single-task lookup.
-        Current output is a single lightweight task object with the same core fields as get_tasks.
+    #     Use when the user references a specific task number/ID and you need a single-task lookup.
+    #     Current output is a single lightweight task object with the same core fields as get_tasks.
 
-        Tool choice:
-        - For broad discovery/search, use get_tasks.
-        - For status timeline or final status, use get_task_changes.
+    #     Tool choice:
+    #     - For broad discovery/search, use get_tasks.
+    #     - For status timeline or final status, use get_task_changes.
 
-        Privacy rule:
-        - Do not expose internal IDs unless explicitly requested.
+    #     Privacy rule:
+    #     - Do not expose internal IDs unless explicitly requested.
 
-        Example:
-        - "Open task SO2"
-        """
-        project_label = "default project"
+    #     Example:
+    #     - "Open task SO2"
+    #     """
+    #     project_label = "default project"
 
-        def tool_action() -> dict:
-            task = adapter.get_task(task_id)
-            transformed = transform_task_payload(task, task_id, project_label)
-            return make_tool_response(
-                tool="get_task",
-                kind="detail",
-                project=project_label,
-                summary=transformed["summary"],
-                data=transformed["data"],
-            )
+    #     def tool_action() -> dict:
+    #         task = adapter.get_task(task_id)
+    #         transformed = transform_task_payload(task, task_id, project_label)
+    #         return make_tool_response(
+    #             tool="get_task",
+    #             kind="detail",
+    #             project=project_label,
+    #             summary=transformed["summary"],
+    #             data=transformed["data"],
+    #         )
 
-        return execute_tool(
-            ToolContext(
-                tool_name="get_task",
-                project_label=project_label,
-                request_payload={"task_id": task_id},
-            ),
-            tool_action,
-        )
+    #     return execute_tool(
+    #         ToolContext(
+    #             tool_name="get_task",
+    #             project_label=project_label,
+    #             request_payload={"task_id": task_id},
+    #         ),
+    #         tool_action,
+    #     )
 
     @mcp.tool()
     @ToolPolicy(max_calls=20)

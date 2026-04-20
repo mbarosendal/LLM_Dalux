@@ -13,9 +13,7 @@ from mcp_dalux.language_model.instructions.tasks_context import TASKS_CONTEXT
 from mcp_dalux.language_model.instructions.user_context import USER_CONTEXT_TEMPLATE
 from mcp_dalux.tools.dalux_tools_tasks import register_dalux_tools_tasks
 from mcp_dalux.tools.dalux_tools_users import register_dalux_tools_users
-
-# MVP1 DONE
-
+from mcp_dalux.tools.dalux_tools_workpackages import register_dalux_tools_workpackages
 
 @dataclass(slots=True)
 class SessionContext:
@@ -82,6 +80,7 @@ _adapter = DaluxAdapter()
 register_dalux_tools_users(mcp, _adapter)
 if default_session.category == "tasks":
     register_dalux_tools_tasks(mcp, _adapter)
+    register_dalux_tools_workpackages(mcp, _adapter)
 elif default_session.category == "files":
     # Files tools will be registered here once implemented.
     pass

@@ -46,6 +46,12 @@ def _normalize_user_object(user: dict) -> dict:
 def _normalize_task_object(task: dict) -> dict:
     type_info = task.get("type") or {}
     created_by = task.get("createdBy") or {}
+    workflow = task.get("workflow") or {}
+    location = task.get("location") or {}
+    coordinate = location.get("coordinate") or {}
+    coordinateXYZ = coordinate.get("xyz") or {}
+    # level = location.get("level") or {}
+    # building = location.get("building") or {}
 
     return {
         "taskId": task.get("taskId", "N/A"),
@@ -54,6 +60,18 @@ def _normalize_task_object(task: dict) -> dict:
         "number": task.get("number", "N/A"),
         "created": convert_to_danish_time(task.get("created", "N/A")),
         "createdByUserId": created_by.get("userId", "N/A"),
+        "workflowName": workflow.get("name", "N/A"),
+        "coordinates": {"X": coordinateXYZ.get("x", "N/A"), "Y": coordinateXYZ.get("y", "N/A"), "Z": coordinateXYZ.get("z", "N/A")},
+        # "levelName": level.get("name", "N/A"),
+        # "buildingName": building.get("name", "N/A"),
+    }
+
+
+def _normalize_workpackage_object(workpackage: dict) -> dict:
+    return {
+        "workpackageId": workpackage.get("workpackageId", "N/A"),
+        "name": workpackage.get("name", "N/A"),
+        "companyId": workpackage.get("companyId", "N/A"),
     }
 
 
@@ -61,8 +79,13 @@ def _normalize_task_object(task: dict) -> dict:
 
 
 def convert_to_danish_time(iso_timestamp: str) -> str:
+    if not isinstance(iso_timestamp, str) or not iso_timestamp:
+        return iso_timestamp
+
     try:
         dt = datetime.fromisoformat(iso_timestamp)
+        if dt.tzinfo is None:
+            return dt.isoformat()
         danish_dt = dt.astimezone(ZoneInfo("Europe/Copenhagen"))
         return danish_dt.isoformat()
     except Exception as e:
@@ -178,10 +201,31 @@ def transform_task_payload(payload: object, task_id: str, project_label: str) ->
     }
 
 
+def transform_workpackages_collection_payload(
+    payload: object,
+    project_label: str,
+) -> dict:
+    workpackages, links, metadata = _extract_collection_payload(payload)
+    items = [_normalize_workpackage_object(item) for item in workpackages]
+
+    summary = (
+        f"Found {len(items)} workpackage(s) for {project_label}."
+        if items
+        else f"No workpackages found for {project_label}."
+    )
+
+    return {
+        "summary": summary,
+        "data": {"items": items},
+        "links": links,
+        "metadata": metadata,
+    }
+
+
 def transform_task_changes_collection_payload(
     payload: object, project_label: str
 ) -> dict:
-    changes, links, _ = _extract_collection_payload(payload)
+    changes, links, metadata = _extract_collection_payload(payload)
     items = []
     task_latest: dict[str, dict] = {}
 
@@ -189,7 +233,16 @@ def transform_task_changes_collection_payload(
         fields = change.get("fields", {}) or {}
         action = change.get("action")
         status = fields.get("status")
+        deadline = fields.get("deadline")
         description = change.get("description") or ""
+        location = fields.get("location") or {}
+        location_value = location.get("value") if isinstance(location, dict) else {}
+        coordinate = location.get("coordinate") or {}
+        if not coordinate:
+            coordinate = location_value.get("coordinate") if isinstance(location_value, dict) else {}
+        coordinateXYZ = coordinate.get("xyz") or {}
+        # level = location.get("level") or {}
+        # building = location.get("building") or {}
 
         inferred = infer_task_change_status(
             action if isinstance(action, str) else None,
@@ -197,9 +250,12 @@ def transform_task_changes_collection_payload(
             bool(description),
         )
 
+        deadline_value = deadline.get("value") if isinstance(deadline, dict) else None
+
         item = {
             "taskId": change.get("taskId"),
-            # "timestamp": dk,
+            "workpackageId": fields.get("workpackageId") or "",
+            "deadline": deadline_value,
             "timestamp": convert_to_danish_time(change.get("timestamp")),
             "action": action,
             "status": status,
@@ -211,6 +267,10 @@ def transform_task_changes_collection_payload(
             "currentResponsibleUserId": (fields.get("currentResponsible") or {}).get(
                 "userId"
             ),
+            "coordinates": {"X": coordinateXYZ.get("x", "N/A"), "Y": coordinateXYZ.get("y", "N/A"), "Z": coordinateXYZ.get("z", "N/A")},
+            # "levelName": level.get("name", "N/A"),
+            # "buildingName": building.get("name", "N/A"),
+
         }
         items.append(item)
 
@@ -238,7 +298,7 @@ def transform_task_changes_collection_payload(
         "summary": changes_summary,
         "data": {"items": items, "taskSummaries": task_summary},
         "links": links,
-        "metadata": {},
+        "metadata": metadata,
     }
 
 
