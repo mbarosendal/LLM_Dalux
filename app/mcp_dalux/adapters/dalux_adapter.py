@@ -62,7 +62,7 @@ class DaluxAdapter:
     #     project_id = self.enforce_project_constraints(project_id)
     #     return self._execute_get(f"/1.1/projects/{project_id}/tasks/attachments")
 
-    # Public method for GET endpoint related to Users
+    # Public method for GET endpoints related to Users
 
     def get_users(self, project_id: str | None = None) -> dict:
         """GET /1.2/projects/{projectId}/users"""
@@ -73,3 +73,11 @@ class DaluxAdapter:
         """GET /1.1/projects/{projectId}/users/{userId}['data']"""
         project_id = self.enforce_project_constraints(project_id)
         return self._execute_get(f"/1.1/projects/{project_id}/users/{user_id}")["data"]
+
+
+    # Public method for GET endpoint related to Workpackages
+
+    def get_workpackages( self, project_id : str | None = None) -> dict:
+        """GET /1.0/projects/{projectId}/workpackages"""
+        project_id = self.enforce_project_constraints(project_id)
+        return self._execute_get(f"/1.0/projects/{project_id}/workpackages")
