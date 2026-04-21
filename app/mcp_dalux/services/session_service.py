@@ -8,7 +8,7 @@ from mcp_dalux.api.schemas import CreateSessionResponse
 # In-memory store for active sessions. In production, this would be a database.
 _active_sessions: dict[str, dict] = {}
 
-
+# Add async+await if we need to do any I/O here later (e.g., database calls, external service calls). For now, it's all in-memory and synchronous.
 def create_session_response(project_name: str, category: str) -> CreateSessionResponse:
     """Create a session with generated runtime values and store it."""
     now_utc = datetime.now(UTC)

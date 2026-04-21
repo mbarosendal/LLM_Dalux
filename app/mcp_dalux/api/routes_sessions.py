@@ -9,7 +9,9 @@ from mcp_dalux.api.schemas import (
     SendPromptResponse,
 )
 from mcp_dalux.services.prompt_service import (
+    LLMError,
     PromptInput,
+    PromptValidationError,
     SessionNotFoundError,
     send_prompt_response,
 )
@@ -33,7 +35,7 @@ router = APIRouter(prefix="/sessions", tags=["sessions"])
 # - DELETE /sessions/{sessionId} (optional cleanup)
 
 @router.post("/create")
-def create_session(session_request: CreateSessionRequest) -> CreateSessionResponse:
+async def create_session(session_request: CreateSessionRequest) -> CreateSessionResponse:
     """Create a new session for a given project and category."""
 
     return create_session_response(
@@ -42,18 +44,22 @@ def create_session(session_request: CreateSessionRequest) -> CreateSessionRespon
     )
 
 @router.post("/{session_id}/prompts/send")
-def send_prompt(prompt_request: SendPromptRequest) -> SendPromptResponse:
+async def send_prompt(session_id: str, prompt_request: SendPromptRequest) -> SendPromptResponse:
     """Send a prompt to an active session.
     
-    The server generates the timestamp; clients cannot set it.
     """
     # Convert HTTP request to internal model with server-generated timestamp
     prompt_input = PromptInput(
-        session_id=prompt_request.session_id,
+        session_id=session_id,
         text=prompt_request.text,
         timestamp=datetime.now(UTC).isoformat(),
     )
     try:
-        return send_prompt_response(prompt_input)
+        return await send_prompt_response(prompt_input)
     except SessionNotFoundError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
+    except PromptValidationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except LLMError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    

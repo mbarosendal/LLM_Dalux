@@ -6,7 +6,7 @@ class InputPolicy:
     """
 
     @staticmethod
-    def preprocess_input(user_input: str) -> str:
+    def preprocess_prompt(user_input: str) -> str:
         """
         Preprocess the user input.
         """

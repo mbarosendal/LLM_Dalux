@@ -27,6 +27,11 @@ class SessionContext:
     subject: str | None = None
 
 
+# Public wrapper to build instructions for HTTP environment
+def build_runtime_instructions_for_http(session_context: SessionContext) -> str:
+    """Build runtime instructions for HTTP environment."""
+    return _build_runtime_instructions(session_context, user_id=Config.DALUX_USER_ID)
+
 # divide into runtime technical scope (ids limits and tools) and llm instructions (context)?
 def _build_runtime_instructions(
     session: SessionContext,

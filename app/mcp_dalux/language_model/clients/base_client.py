@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-class baseClient(ABC):
+class BaseClient(ABC):
 
     @property
     @abstractmethod
@@ -15,11 +15,6 @@ class baseClient(ABC):
         pass
 
     @abstractmethod
-    def send_message(self, message: str) -> str:
-        """Send a message to the language model and get a response."""
-        pass
-
-    @abstractmethod
-    def send_message_with_tools(self, message: str, tools: list) -> str:
-        """Send a message along with available tools to the language model and get a response."""
+    async def generate_context(self, prompt: str, instructions: str, tools: list | None = None) -> str:
+        """Generate context for the language model from a prompt and instructions."""
         pass
