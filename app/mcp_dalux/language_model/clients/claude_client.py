@@ -11,9 +11,9 @@ class ClaudeClient(BaseClient):
     def version(self) -> str:
         return "Unknown"
 
-    async def generate_context(self, prompt: str, instructions: str, tools: list | None = None) -> str:
+    async def generate_text(self, text: str, instructions: str, tools: list | None = None) -> str:
         tools_description = ", ".join(tools) if tools else "no tools"
         return (
-            f"Claude generated text for: {prompt} "
+            f"Claude generated text for: {text} "
             f"with instructions: {instructions} and tools: {tools_description}"
         )

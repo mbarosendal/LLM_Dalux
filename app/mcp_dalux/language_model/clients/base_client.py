@@ -15,6 +15,6 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    async def generate_context(self, prompt: str, instructions: str, tools: list | None = None) -> str:
-        """Generate context for the language model from a prompt and instructions."""
+    async def generate_text(self, text: str, instructions: str, tools: list | None = None) -> str:
+        """Generate text for the language model from a text and instructions."""
         pass
