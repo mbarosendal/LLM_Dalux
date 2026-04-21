@@ -12,10 +12,9 @@ from mcp_dalux.services.prompt_service import (
     LLMError,
     PromptInput,
     PromptValidationError,
-    SessionNotFoundError,
     send_prompt_response,
 )
-from mcp_dalux.services.session_service import create_session_response
+from mcp_dalux.services.session_service import SessionNotFoundError, create_session_response
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 

@@ -8,14 +8,14 @@ class InputPolicy:
     @staticmethod
     def preprocess_prompt(user_input: str) -> str:
         """
-        Preprocess the user input.
+        Preprocess the user input (trim whitespace).
         """
         return user_input.strip()
 
     @staticmethod
     def validate_prompt(user_input: str) -> bool:
         """
-        Validate incoming prompt text.
+        Validate incoming prompt text (check for empty input and length).
         
         Returns True if valid, False otherwise.
         """

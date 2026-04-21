@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+from mcp_dalux.language_model.contracts import AgentDecision
+
 class BaseClient(ABC):
 
     @property
@@ -15,6 +17,6 @@ class BaseClient(ABC):
         pass
 
     @abstractmethod
-    async def generate_text(self, text: str, instructions: str, tools: list | None = None) -> str:
-        """Generate text for the language model from a text and instructions."""
+    async def generate_decision(self, text: str, instructions: str, tools: list[str] | None = None) -> AgentDecision:
+        """Return the model's next decision for a prompt turn."""
         pass

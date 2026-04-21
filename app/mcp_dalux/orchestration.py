@@ -27,6 +27,8 @@ class SessionContext:
     subject: str | None = None
 
 
+# Need a public wrapper to build instructions for the stdio environment branch too
+
 # Public wrapper to build instructions for HTTP environment
 def build_runtime_instructions_for_http(session_context: SessionContext) -> str:
     """Build runtime instructions for HTTP environment."""

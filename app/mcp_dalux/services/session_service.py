@@ -4,6 +4,11 @@ from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
 from mcp_dalux.api.schemas import CreateSessionResponse
+from mcp_dalux.orchestration import SessionContext
+
+class SessionNotFoundError(ValueError):
+    """Raised when a prompt references a non-existent or inactive session."""
+
 
 # In-memory store for active sessions. In production, this would be a database.
 _active_sessions: dict[str, dict] = {}
@@ -42,3 +47,19 @@ def check_session_exists(session_id: str) -> bool:
 def get_session(session_id: str) -> dict | None:
     """Retrieve session metadata if it exists."""
     return _active_sessions.get(session_id)
+
+def build_session_context(session_id: str) -> SessionContext:
+    """Load session data and build a SessionContext object."""
+
+    if not check_session_exists(session_id):
+        raise SessionNotFoundError("Session does not exist or is not active")
+    
+    session_data = get_session(session_id)
+
+    return SessionContext(
+        start_time=datetime.fromisoformat(session_data["start_time"]),
+        end_time=datetime.fromisoformat(session_data["end_time"]),
+        category=session_data["category"],
+        project_name=session_data["project_name"],
+        subject=session_data.get("subject"),
+    )
