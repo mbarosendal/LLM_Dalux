@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 
-from mcp_dalux.language_model.contracts import AgentDecision, ToolRequest
+from mcp_dalux.clients.contracts import AgentDecision, ToolRequest
 
 
 def build_structured_user_prompt(text: str, tools: list[str] | None = None) -> str:

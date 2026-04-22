@@ -7,9 +7,9 @@ from google import genai
 from google.genai import types
 
 from mcp_dalux.config import Config
-from mcp_dalux.language_model.clients.base_client import BaseClient
-from mcp_dalux.language_model.contracts import AgentDecision
-from mcp_dalux.language_model.decision_service import (
+from mcp_dalux.clients.clients.base_client import BaseClient
+from mcp_dalux.clients.contracts import AgentDecision
+from mcp_dalux.clients.decision_service import (
     build_structured_user_prompt,
     parse_agent_decision_output,
 )

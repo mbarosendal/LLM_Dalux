@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from mcp_dalux.language_model.contracts import AgentDecision
+from mcp_dalux.clients.contracts import AgentDecision
 
 class BaseClient(ABC):
 

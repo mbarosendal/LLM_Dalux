@@ -3,9 +3,9 @@ from fastmcp import FastMCP
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 from mcp_dalux.config import Config
 from mcp_dalux.policies.tool_policy import ToolPolicy
-from mcp_dalux.tools.tool_execution import ToolContext, execute_tool
-from mcp_dalux.tools.tool_presenters import make_tool_response
-from mcp_dalux.tools.tool_transformers import (
+from mcp_dalux.client_tools.tool_execution import ToolContext, execute_tool
+from mcp_dalux.client_tools.tool_presenters import make_tool_response
+from mcp_dalux.client_tools.tool_transformers import (
     transform_user_payload,
     transform_users_collection_payload,
 )

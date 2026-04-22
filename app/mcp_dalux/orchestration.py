@@ -6,14 +6,14 @@ from fastmcp import FastMCP
 from mcp_dalux.config import Config
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 
-from mcp_dalux.language_model.instructions.dalux_context import DALUX_CONTEXT
-from mcp_dalux.language_model.instructions.files_context import FILES_CONTEXT
-from mcp_dalux.language_model.instructions.system_prompt import SYSTEM_PROMPT
-from mcp_dalux.language_model.instructions.tasks_context import TASKS_CONTEXT
-from mcp_dalux.language_model.instructions.user_context import USER_CONTEXT_TEMPLATE
-from mcp_dalux.tools.dalux_tools_tasks import register_dalux_tools_tasks
-from mcp_dalux.tools.dalux_tools_users import register_dalux_tools_users
-from mcp_dalux.tools.dalux_tools_workpackages import register_dalux_tools_workpackages
+from mcp_dalux.clients.instructions.dalux_context import DALUX_CONTEXT
+from mcp_dalux.clients.instructions.files_context import FILES_CONTEXT
+from mcp_dalux.clients.instructions.system_prompt import SYSTEM_PROMPT
+from mcp_dalux.clients.instructions.tasks_context import TASKS_CONTEXT
+from mcp_dalux.clients.instructions.user_context import USER_CONTEXT_TEMPLATE
+from mcp_dalux.client_tools.dalux_tools_tasks import register_dalux_tools_tasks
+from mcp_dalux.client_tools.dalux_tools_users import register_dalux_tools_users
+from mcp_dalux.client_tools.dalux_tools_workpackages import register_dalux_tools_workpackages
 
 @dataclass(slots=True)
 class SessionContext:

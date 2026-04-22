@@ -2,9 +2,9 @@ from fastmcp import FastMCP
 
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 from mcp_dalux.policies.tool_policy import ToolPolicy
-from mcp_dalux.tools.tool_execution import ToolContext, execute_tool
-from mcp_dalux.tools.tool_presenters import make_tool_response
-from mcp_dalux.tools.tool_transformers import transform_workpackages_collection_payload
+from mcp_dalux.client_tools.tool_execution import ToolContext, execute_tool
+from mcp_dalux.client_tools.tool_presenters import make_tool_response
+from mcp_dalux.client_tools.tool_transformers import transform_workpackages_collection_payload
 
 
 def register_dalux_tools_workpackages(mcp: FastMCP, adapter: DaluxAdapter) -> None:

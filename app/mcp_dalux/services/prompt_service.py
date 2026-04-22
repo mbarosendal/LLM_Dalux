@@ -5,8 +5,8 @@ from dataclasses import dataclass
 import json
 
 from mcp_dalux.api.schemas import SendPromptResponse
-from mcp_dalux.language_model.contracts import AgentDecision
-from mcp_dalux.language_model.client_factory import get_llm_client
+from mcp_dalux.clients.contracts import AgentDecision
+from mcp_dalux.clients.client_factory import get_llm_client
 from mcp_dalux.orchestration import build_runtime_instructions_for_http
 from mcp_dalux.policies.input_policy import InputPolicy
 from mcp_dalux.services.session_service import build_session_context

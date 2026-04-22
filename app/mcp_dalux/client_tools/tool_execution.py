@@ -6,7 +6,7 @@ from dataclasses import dataclass
 import httpx
 
 from mcp_dalux.logging_setup import append_structured_event, get_file_logger
-from mcp_dalux.tools.tool_presenters import make_error_response
+from mcp_dalux.client_tools.tool_presenters import make_error_response
 
 TOOL_LOG_FILE = "dalux_tool_debug.log"
 

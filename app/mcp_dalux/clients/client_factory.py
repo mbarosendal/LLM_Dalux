@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 from mcp_dalux.config import Config
-from mcp_dalux.language_model.clients.base_client import BaseClient
-from mcp_dalux.language_model.clients.claude_client import ClaudeClient
-from mcp_dalux.language_model.clients.gemini_client import GeminiClient
-from mcp_dalux.language_model.clients.mock_client import MockClient
+from mcp_dalux.clients.clients.base_client import BaseClient
+from mcp_dalux.clients.clients.claude_client import ClaudeClient
+from mcp_dalux.clients.clients.gemini_client import GeminiClient
+from mcp_dalux.clients.clients.mock_client import MockClient
 
 
 def get_llm_client() -> BaseClient:
