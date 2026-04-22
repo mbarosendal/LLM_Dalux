@@ -6,19 +6,34 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 
 class Config:
-    # Switch to enforce project constraints
-    # USE_TEST_MODE = True
     IS_TEST_PROJECT_ONLY = True
     DALUX_SCOPED_PROJECT_ID = os.getenv("DALUX_PROJECT_ID")
 
     DALUX_BASE_URL = os.getenv("DALUX_BASE_URL")
     DALUX_API_KEY = os.getenv("DALUX_API_KEY")
 
-    # Optional actor context for personal queries.
+    # Optional user context for personal queries.
     DALUX_USER_ID = os.getenv("DALUX_USER_ID")
+
+    # Transport mode: 'stdio' for local, 'http' for API server.
+    MCP_TRANSPORT = "http"
+    # See client_factory.py for options
+    LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
+
+    # Claude runtime config.
+    CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
+    CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-4-6")
+
+    # Gemini runtime config (to be added when Gemini client is wired up)
+    GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview")
 
     @classmethod
     def validate(cls) -> None:
+        if cls.MCP_TRANSPORT not in {"stdio", "http"}:
+            raise ValueError("MCP_TRANSPORT must be either 'stdio' or 'http'.")
+        if cls.LLM_PROVIDER not in {"claude", "mock", "gemini"}:
+            raise ValueError("LLM_PROVIDER must be one of: claude, mock, gemini.")
         if not cls.DALUX_BASE_URL:
             raise ValueError("DALUX_BASE_URL is not set in the environment variables.")
         if not cls.DALUX_API_KEY:
@@ -29,3 +44,7 @@ class Config:
             )
         if not cls.DALUX_USER_ID:
             raise ValueError("DALUX_USER_ID is not set in the environment variables.")
+        if cls.LLM_PROVIDER == "claude" and not cls.CLAUDE_API_KEY:
+            raise ValueError("CLAUDE_API_KEY is required when LLM_PROVIDER is 'claude'.")
+        if cls.LLM_PROVIDER == "gemini" and not cls.GEMINI_API_KEY:
+            raise ValueError("GEMINI_API_KEY is required when LLM_PROVIDER is 'gemini'.")

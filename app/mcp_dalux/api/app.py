@@ -2,8 +2,12 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
+from mcp_dalux.logging_setup import configure_logging
 from mcp_dalux.api.routes_health import router as health_router
 from mcp_dalux.api.routes_sessions import router as sessions_router
+
+
+configure_logging()
 
 app = FastAPI(
 	title="Dalux HTTP API",
