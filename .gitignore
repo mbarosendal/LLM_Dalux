@@ -15,5 +15,5 @@ __pycache__
 *.json
 !settings.json
 
-/json_dumps/
+/logs/
 app/mcp_dalux/language_model/instructions/__init__.py

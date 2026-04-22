@@ -5,7 +5,7 @@ import logging
 from datetime import datetime, timezone
 from pathlib import Path
 
-LOG_DIR = Path(__file__).resolve().parents[2] / "json_dumps"
+LOG_DIR = Path(__file__).resolve().parents[2] / "logs"
 DEFAULT_CLIENT_LOG_NAME = "client_debug.log"
 
 
@@ -21,7 +21,7 @@ def configure_logging() -> None:
 
 
 def get_file_logger(name: str, log_filename: str, level: int = logging.INFO) -> logging.Logger:
-    """Return a logger that writes to a dedicated file under json_dumps."""
+    """Return a logger that writes to a dedicated file under logs."""
     logger = logging.getLogger(name)
     logger.setLevel(level)
 
@@ -46,7 +46,7 @@ def attach_file_handler(
     log_filename: str,
     formatter: logging.Formatter,
 ) -> None:
-    """Attach a single file handler under json_dumps if one is not already present."""
+    """Attach a single file handler under logs if one is not already present."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOG_DIR / log_filename
 
@@ -68,7 +68,7 @@ def append_structured_event(
     event: str,
     payload: dict,
 ) -> None:
-    """Append one event under json_dumps with a consistent shape."""
+    """Append one event under logs with a consistent shape."""
     LOG_DIR.mkdir(parents=True, exist_ok=True)
     log_path = LOG_DIR / log_filename
 
