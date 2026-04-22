@@ -20,6 +20,9 @@ class Config:
     # See client_factory.py for options
     LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
 
+    # Limit of agent rounds (one full cycle of tool usage) to prevent infinite loops.
+    MAX_AGENT_ROUNDS = 2
+
     # Claude runtime config.
     CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
     CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-4-6")

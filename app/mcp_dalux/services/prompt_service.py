@@ -7,6 +7,7 @@ import json
 from mcp_dalux.api.schemas import SendPromptResponse
 from mcp_dalux.clients.contracts import AgentDecision
 from mcp_dalux.clients.client_factory import get_llm_client
+from mcp_dalux.config import Config
 from mcp_dalux.orchestration import build_runtime_instructions_for_http
 from mcp_dalux.policies.input_policy import InputPolicy
 from mcp_dalux.services.session_service import build_session_context
@@ -36,8 +37,6 @@ class LLMError(RuntimeError):
     """Raised when there's an error communicating with the language model."""
 
 _llm_client = get_llm_client()
-_MAX_AGENT_ROUNDS = 2
-
 
 @dataclass
 class PromptInput:
@@ -72,10 +71,10 @@ async def _dispatch_tools(decision: AgentDecision) -> list[dict[str, object]]:
 
 
 async def _run_agent_loop(processed_text: str, runtime_instructions: str) -> str:
-    """Run a agent loop with tool branching."""
+    """Iterative branching of agent decisions to either generate a final answer or dispatch tools."""
     current_text = processed_text
 
-    for _ in range(_MAX_AGENT_ROUNDS):
+    for _ in range(Config.MAX_AGENT_ROUNDS):
         decision: AgentDecision = await _llm_client.generate_decision(
             text=current_text,
             instructions=runtime_instructions,
@@ -100,7 +99,7 @@ async def _run_agent_loop(processed_text: str, runtime_instructions: str) -> str
         logger.warning("Model returned unsupported decision shape mode=%s", decision.mode)
         return "Model returned an unsupported decision shape."
 
-    logger.warning("Reached agent round limit=%s", _MAX_AGENT_ROUNDS)
+    logger.warning("Reached agent round limit=%s", Config.MAX_AGENT_ROUNDS)
     return "Reached agent round limit before producing a final answer."
 
 
