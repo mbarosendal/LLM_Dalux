@@ -11,9 +11,9 @@ __pycache__
 .pytest_cache/
 *.egg-info/
 
-# Exclude all json files except settings.json
+# Exclude all json files
 *.json
-!settings.json
 
+/.vscode/
 /logs/
 app/mcp_dalux/language_model/instructions/__init__.py
