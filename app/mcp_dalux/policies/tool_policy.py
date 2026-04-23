@@ -3,7 +3,6 @@ from functools import wraps
 from typing import Any, Callable
 
 from fastmcp.exceptions import ToolError
-from fastmcp.server.dependencies import get_context
 
 
 class ToolPolicyError(RuntimeError):
@@ -21,34 +20,32 @@ class ToolPolicy:
 
         self.max_calls = max_calls
         self.window_seconds = window_seconds
-        # Keyed by (function name, session key) with a list of timestamps .
+        # Keyed by (function name, session key) with a list of timestamps (floats to represent seconds).
         self.calls_by_timed_session: dict[tuple[str, str], list[float]] = {}
 
-    def _get_session_key(self) -> str:
-        """Resolve a stable key for the current FastMCP session."""
-        try:
-            ctx = get_context()
-            if ctx.session_id:
-                return f"session:{ctx.session_id}"
-            return "unknown-session"
-        except RuntimeError:
-            # Fallback for execution paths without an active FastMCP context.
-            return "no-active-context"
+    def _get_scope_key(self, kwargs: dict[str, Any]) -> str:
+        """Resolve the transport-agnostic limiter scope key from call kwargs."""
+        scope_key = kwargs.get("scope_key")
+        if isinstance(scope_key, str) and scope_key:
+            return scope_key
+
+        message = "Tool policy scope key is required. Pass scope_key from the transport layer."
+        raise ToolError(message) from ToolPolicyError(message)
 
     # The __call__ method lets the decorator pass parameters and wrap the target function (fn).
     def __call__(self, fn: Callable[..., Any]) -> Callable[..., Any]:
         @wraps(fn)
         def wrapper(*args: Any, **kwargs: Any) -> Any:
-            session_key = self._get_session_key()
-            counter_key = (fn.__name__, session_key)
+            """Enforce the rolling call window before executing the tool function by tracking  ."""
+            scope_key = self._get_scope_key(kwargs)
+            counter_key = (fn.__name__, scope_key)
+            # Returns a float number of seconds passed since a shared and fixed arbitrary point  (e.g. system start).
             now = time.monotonic()
             rolling_cutoff = now - self.window_seconds
 
-            # Count only recent calls (later than/more recent than the rolling cutoff) by filtering out timestamps outside the rolling window.
+            # Filter out calls that took place before the rolling cutoff (call_time is a float tracking call age in seconds).
             recent_calls = [
-                timestamp
-                for timestamp in self.calls_by_timed_session.get(counter_key, [])
-                if timestamp > rolling_cutoff
+                call_time for call_time in self.calls_by_timed_session.get(counter_key, []) if call_time > rolling_cutoff
             ]
 
             if len(recent_calls) >= self.max_calls:
