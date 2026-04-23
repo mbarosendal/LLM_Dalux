@@ -23,7 +23,7 @@ def create_session_response(project_name: str, category: str) -> CreateSessionRe
 
     session_id = str(uuid4())
 
-    # Store session in memory
+    # Store session in runtime memory
     _active_sessions[session_id] = {
         "project_name": project_name,
         "category": category,
@@ -46,25 +46,30 @@ def check_session_exists(session_id: str) -> bool:
     return session_id in _active_sessions
 
 
-def get_session(session_id: str) -> dict | None:
+def get_session(session_id: str) -> dict:
     """Retrieve session metadata if it exists."""
-    return _active_sessions.get(session_id)
+
+    if not check_session_exists(session_id):
+        raise SessionNotFoundError("Session does not exist or is not active")
+
+    return _active_sessions[session_id]
 
 
-def update_session_end_time(session_id: str) -> None:
-    """Update the end time of an existing session."""
+def update_session_end_time(session_id: str) -> str:
+    """Update end time for a session and return the persisted ISO timestamp."""
+
+    if not check_session_exists(session_id):
+        raise SessionNotFoundError("Session does not exist or is not active")
 
     now_utc = datetime.now(UTC)
+    end_time_iso = now_utc.isoformat()
+    _active_sessions[session_id]["end_time"] = end_time_iso
 
-    if session_id in _active_sessions:
-        _active_sessions[session_id]["end_time"] = now_utc.isoformat()
+    return end_time_iso
 
 
 def build_session_context(session_id: str) -> SessionContext:
     """Load session data and build a SessionContext object."""
-
-    if not check_session_exists(session_id):
-        raise SessionNotFoundError("Session does not exist or is not active")
 
     session_data = get_session(session_id)
 

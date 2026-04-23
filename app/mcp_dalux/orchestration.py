@@ -24,23 +24,8 @@ class SessionContext:
     subject: str | None = None
 
 
-# Need a public wrapper to build instructions for the stdio environment branch too
-
-
-# Public wrapper to build instructions for HTTP environment
-def build_runtime_instructions_for_http(session_context: SessionContext) -> str:
-    """Build runtime instructions for HTTP environment."""
-    return build_runtime_instructions(
-        category=session_context.category,
-        project_id=session_context.project_id,
-        project_name=session_context.project_name,
-        subject=session_context.subject,
-        actor_user_id=Config.DALUX_USER_ID,
-    )
-
-
 def get_default_session_context() -> SessionContext:
-    """Default session context used for stdio/MCP startup."""
+    """Dummy session context used for stdio/MCP startup."""
     return SessionContext(
         start_time=datetime.now(),
         project_name="PLACEHOLDER: to be user to look up projectId via API after rollout to more projects",
