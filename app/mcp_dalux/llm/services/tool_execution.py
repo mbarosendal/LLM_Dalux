@@ -4,9 +4,8 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 import httpx
-
-from mcp_dalux.logging_setup import append_structured_event, get_file_logger
-from mcp_dalux.client_tools.tool_presenters import make_error_response
+from mcp_dalux.llm.services.tool_presenters import make_error_response
+from mcp_dalux.logging_setup import append_structured_log_event, get_file_logger
 
 TOOL_LOG_FILE = "dalux_tool_debug.log"
 
@@ -22,7 +21,7 @@ class ToolContext:
 
 def execute_tool(context: ToolContext, action: Callable[[], dict]) -> dict:
     """Run a tool action with centralized logging, debug dumping, and error handling."""
-    append_structured_event(
+    append_structured_log_event(
         log_filename=TOOL_LOG_FILE,
         source=context.tool_name,
         event="request",
@@ -35,7 +34,7 @@ def execute_tool(context: ToolContext, action: Callable[[], dict]) -> dict:
     try:
         result = action()
         if isinstance(result, dict):
-            append_structured_event(
+            append_structured_log_event(
                 log_filename=TOOL_LOG_FILE,
                 source=context.tool_name,
                 event="response",
@@ -55,7 +54,7 @@ def execute_tool(context: ToolContext, action: Callable[[], dict]) -> dict:
             context.project_label,
             exc,
         )
-        append_structured_event(
+        append_structured_log_event(
             log_filename=TOOL_LOG_FILE,
             source=context.tool_name,
             event="error",
@@ -75,7 +74,7 @@ def execute_tool(context: ToolContext, action: Callable[[], dict]) -> dict:
             context.project_label,
             exc,
         )
-        append_structured_event(
+        append_structured_log_event(
             log_filename=TOOL_LOG_FILE,
             source=context.tool_name,
             event="error",
@@ -95,7 +94,7 @@ def execute_tool(context: ToolContext, action: Callable[[], dict]) -> dict:
             context.project_label,
             exc,
         )
-        append_structured_event(
+        append_structured_log_event(
             log_filename=TOOL_LOG_FILE,
             source=context.tool_name,
             event="error",

@@ -1,5 +1,4 @@
 import pytest
-
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 
 pytestmark = pytest.mark.integration
@@ -11,9 +10,7 @@ def test_live_get_tasks_smoke():
         result = adapter.get_tasks()
         items = result.get("items", []) if isinstance(result, dict) else []
         if not items:
-            pytest.skip(
-                "No tasks found in the project; cannot verify get_tasks response shape."
-            )
+            pytest.skip("No tasks found in the project; cannot verify get_tasks response shape.")
     finally:
         adapter._client.close()
 
@@ -34,9 +31,7 @@ def test_live_get_task_smoke():
             pytest.skip("No tasks found in the project; cannot test get_task endpoint.")
         task_id = tasks[0].get("taskId")
         if not task_id:
-            pytest.skip(
-                "First task does not have a taskId; cannot test get_task endpoint."
-            )
+            pytest.skip("First task does not have a taskId; cannot test get_task endpoint.")
         result = adapter.get_task(task_id)
     finally:
         adapter._client.close()
@@ -51,9 +46,7 @@ def test_live_get_task_changes_smoke():
         result = adapter.get_task_changes()
         items = result.get("items", []) if isinstance(result, dict) else []
         if not items:
-            pytest.skip(
-                "No task changes found in the project; cannot verify get_task_changes response shape."
-            )
+            pytest.skip("No task changes found in the project; cannot verify get_task_changes response shape.")
     finally:
         adapter._client.close()
 
@@ -70,9 +63,7 @@ def test_live_get_users_smoke():
         result = adapter.get_users()
         items = result.get("items", []) if isinstance(result, dict) else []
         if not items:
-            pytest.skip(
-                "No users found in project; cannot verify get_users response shape."
-            )
+            pytest.skip("No users found in project; cannot verify get_users response shape.")
     finally:
         adapter._client.close()
 
@@ -92,9 +83,7 @@ def test_live_get_user_smoke():
             pytest.skip("No users found in the project; cannot test get_user endpoint.")
         user_id = users[0].get("userId")
         if not user_id:
-            pytest.skip(
-                "First user does not have a userId; cannot test get_user endpoint."
-            )
+            pytest.skip("First user does not have a userId; cannot test get_user endpoint.")
         result = adapter.get_user(user_id)
     finally:
         adapter._client.close()
@@ -109,9 +98,7 @@ def test_live_get_workpackages_smoke():
         result = adapter.get_workpackages()
         items = result.get("items", []) if isinstance(result, dict) else []
         if not items:
-            pytest.skip(
-                "No workpackages found in the project; cannot verify get_workpackages response shape."
-            )
+            pytest.skip("No workpackages found in the project; cannot verify get_workpackages response shape.")
     finally:
         adapter._client.close()
 
@@ -121,7 +108,6 @@ def test_live_get_workpackages_smoke():
     if items:
         assert isinstance(result["items"][0], dict)
 
-        
 
 # def test_live_get_task_attachments_smoke():
 #     adapter = DaluxAdapter()

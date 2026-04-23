@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import logging
 
-from mcp_dalux.clients.contracts import AgentDecision, ToolRequest
+from mcp_dalux.llm.contracts import AgentDecision, ToolRequest
 
 
 def build_structured_user_prompt(text: str, tools: list[str] | None = None) -> str:
@@ -27,8 +27,9 @@ def parse_agent_decision_output(
     logger: logging.Logger,
     empty_message: str,
 ) -> AgentDecision:
-    """Normalize raw model text output into the internal AgentDecision contract."""
+    """Parse raw model output into our internal AgentDecision contract."""
     normalized_output = (raw_output or "").strip()
+
     if not normalized_output:
         logger.warning("%s returned empty text response", provider_name)
         return AgentDecision(
@@ -37,6 +38,7 @@ def parse_agent_decision_output(
             raw_output=None,
         )
 
+    # Attempt to parse the output as JSON. If it fails, treat the entire output as a final answer string.
     try:
         parsed = json.loads(normalized_output)
     except json.JSONDecodeError:
@@ -47,6 +49,7 @@ def parse_agent_decision_output(
             raw_output=normalized_output,
         )
 
+    # Extract tool requests if present, ensuring we have a list of dicts with the expected keys.
     tool_requests_payload = parsed.get("tool_requests", []) or []
     tool_requests = [
         ToolRequest(

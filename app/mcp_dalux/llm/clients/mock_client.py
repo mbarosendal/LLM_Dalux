@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from mcp_dalux.clients.clients.base_client import BaseClient
-from mcp_dalux.clients.contracts import AgentDecision, ToolRequest
+from mcp_dalux.llm.clients.base_client import BaseClient
+from mcp_dalux.llm.contracts import AgentDecision, ToolRequest
 
 
 class MockClient(BaseClient):

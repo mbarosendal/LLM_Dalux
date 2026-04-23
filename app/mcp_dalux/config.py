@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
@@ -16,7 +17,7 @@ class Config:
     DALUX_USER_ID = os.getenv("DALUX_USER_ID")
 
     # Transport mode: 'stdio' for local, 'http' for API server.
-    MCP_TRANSPORT = "http"
+    MCP_TRANSPORT = "stdio"
     # See client_factory.py for options
     LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
 
@@ -42,9 +43,7 @@ class Config:
         if not cls.DALUX_API_KEY:
             raise ValueError("DALUX_API_KEY is not set in the environment variables.")
         if not cls.DALUX_SCOPED_PROJECT_ID:
-            raise ValueError(
-                "DALUX_PROJECT_ID is not set in the environment variables."
-            )
+            raise ValueError("DALUX_PROJECT_ID is not set in the environment variables.")
         if not cls.DALUX_USER_ID:
             raise ValueError("DALUX_USER_ID is not set in the environment variables.")
         if cls.LLM_PROVIDER == "claude" and not cls.CLAUDE_API_KEY:

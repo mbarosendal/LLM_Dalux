@@ -6,9 +6,9 @@ import logging
 from anthropic import AsyncAnthropic
 
 from mcp_dalux.config import Config
-from mcp_dalux.clients.clients.base_client import BaseClient
-from mcp_dalux.clients.contracts import AgentDecision
-from mcp_dalux.clients.decision_service import (
+from mcp_dalux.llm.clients.base_client import BaseClient
+from mcp_dalux.llm.contracts import AgentDecision
+from mcp_dalux.llm.services.decision_service import (
     build_structured_user_prompt,
     parse_agent_decision_output,
 )
@@ -55,14 +55,13 @@ class ClaudeClient(BaseClient):
         except Exception:
             logger.exception("Claude SDK request failed")
             raise
-        
+
+        # Filter "blocks" in response (a flat list) by inspecting attributes on each block
         raw_output = "\n".join(
-            block.text
-            for block in response.content
-            if getattr(block, "type", None) == "text" and getattr(block, "text", None)
+            block.text for block in response.content if getattr(block, "type", None) == "text" and getattr(block, "text", None)
         )
 
-        # Process the raw text output into our internal AgentDecision format.
+        # Process the text output into our internal AgentDecision format.
         return parse_agent_decision_output(
             raw_output=raw_output,
             provider_name=self.model_name,

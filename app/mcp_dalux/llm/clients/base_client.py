@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 
-from mcp_dalux.clients.contracts import AgentDecision
+from mcp_dalux.llm.contracts import AgentDecision
+
 
 class BaseClient(ABC):
-
     @property
     @abstractmethod
     def model_name(self) -> str:

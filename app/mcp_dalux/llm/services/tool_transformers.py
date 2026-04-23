@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
@@ -14,16 +15,8 @@ def _extract_collection_payload(payload: object) -> tuple[list[dict], list[dict]
     links = payload.get("links", [])
     metadata = payload.get("metadata", {})
 
-    normalized_items = (
-        [item for item in items if isinstance(item, dict)]
-        if isinstance(items, list)
-        else []
-    )
-    normalized_links = (
-        [link for link in links if isinstance(link, dict)]
-        if isinstance(links, list)
-        else []
-    )
+    normalized_items = [item for item in items if isinstance(item, dict)] if isinstance(items, list) else []
+    normalized_links = [link for link in links if isinstance(link, dict)] if isinstance(links, list) else []
     normalized_metadata = metadata if isinstance(metadata, dict) else {}
 
     return normalized_items, normalized_links, normalized_metadata
@@ -61,7 +54,11 @@ def _normalize_task_object(task: dict) -> dict:
         "created": convert_to_danish_time(task.get("created", "N/A")),
         "createdByUserId": created_by.get("userId", "N/A"),
         "workflowName": workflow.get("name", "N/A"),
-        "coordinates": {"X": coordinateXYZ.get("x", "N/A"), "Y": coordinateXYZ.get("y", "N/A"), "Z": coordinateXYZ.get("z", "N/A")},
+        "coordinates": {
+            "X": coordinateXYZ.get("x", "N/A"),
+            "Y": coordinateXYZ.get("y", "N/A"),
+            "Z": coordinateXYZ.get("z", "N/A"),
+        },
         # "levelName": level.get("name", "N/A"),
         # "buildingName": building.get("name", "N/A"),
     }
@@ -103,23 +100,23 @@ def infer_task_change_status(
     status_value = (status or "").strip().lower()
 
     if action_value == "approve" and has_description:
-        return "approved, with follow up"
+        return 'approved, with follow up ("godkendt, med opfølgning")'
     if action_value == "approve" and status_value == "closed":
-        return "approved"
-    # if action_value == "assign" and has_description: # and has fields.userdefinedfields.items.name == sikkerhedskategori?
+        return 'approved ("godkendt")'
+    # if action_value == "assign" and has_description:
     #     return "new"
     if action_value == "assign" and status_value == "open":
-        return "ongoing"
+        return 'new and ongoing ("nye og igangværende")'  # Combined status for now.
     if action_value == "update" and has_description:
-        return "ongoing"  # + ", with follow up" ?
+        return 'ongoing, with update ("igangværende, med opdatering")'  # + ", with follow up" ?
     if action_value == "reject" and status_value == "open":
-        return "rejected"
+        return 'rejected ("afvist")'
     if action_value == "complete" and status_value == "open":
-        return "ready"
+        return 'ready ("klarmeldt")'
     # if action_value == "other" and status_value == "closed":
     #     return "archived"
     if action_value == "other" and status_value == "closed":
-        return "expired"
+        return 'archived and expired ("arkiveret og udgået")'  # Combined status for now.
     if status_value in {"closed", "open"}:
         return "unknown"
     return "unknown"
@@ -150,10 +147,7 @@ def _find_latest_change(item: dict, task_latest: dict[str, dict]) -> None:
         return
 
     # New item wins if timestamp is newer, or if same timestamp but higher status priority (closed > open).
-    if timestamp > old_timestamp or (
-        timestamp == old_timestamp
-        and _status_priority(item) >= _status_priority(existing)
-    ):
+    if timestamp > old_timestamp or (timestamp == old_timestamp and _status_priority(item) >= _status_priority(existing)):
         task_latest[task_id] = item
 
 
@@ -170,11 +164,7 @@ def transform_tasks_collection_payload(
     # 2) Normalize each task object by extracting relevant fields and flattening nested structures
     items = [_normalize_task_object(task) for task in tasks]
     page_label = " (paginated via bookmark)" if bookmark else ""
-    summary = (
-        f"Found {len(items)} task(s) for {project_label}{page_label}."
-        if items
-        else f"No tasks found for {project_label}."
-    )
+    summary = f"Found {len(items)} task(s) for {project_label}{page_label}." if items else f"No tasks found for {project_label}."
     # 3) Build final transformed payload with summary, normalized data, and original links/metadata
     return {
         "summary": summary,
@@ -185,16 +175,8 @@ def transform_tasks_collection_payload(
 
 
 def transform_task_payload(payload: object, task_id: str, project_label: str) -> dict:
-    task = (
-        _normalize_task_object(payload)
-        if isinstance(payload, dict) and payload
-        else None
-    )
-    summary = (
-        f"Found task for {project_label}."
-        if task
-        else f"No task found for task ID {task_id} in {project_label}."
-    )
+    task = _normalize_task_object(payload) if isinstance(payload, dict) and payload else None
+    summary = f"Found task for {project_label}." if task else f"No task found for task ID {task_id} in {project_label}."
     return {
         "summary": summary,
         "data": {"task": task},
@@ -209,9 +191,7 @@ def transform_workpackages_collection_payload(
     items = [_normalize_workpackage_object(item) for item in workpackages]
 
     summary = (
-        f"Found {len(items)} workpackage(s) for {project_label}."
-        if items
-        else f"No workpackages found for {project_label}."
+        f"Found {len(items)} workpackage(s) for {project_label}." if items else f"No workpackages found for {project_label}."
     )
 
     return {
@@ -222,9 +202,7 @@ def transform_workpackages_collection_payload(
     }
 
 
-def transform_task_changes_collection_payload(
-    payload: object, project_label: str
-) -> dict:
+def transform_task_changes_collection_payload(payload: object, project_label: str) -> dict:
     changes, links, metadata = _extract_collection_payload(payload)
     items = []
     task_latest: dict[str, dict] = {}
@@ -264,13 +242,14 @@ def transform_task_changes_collection_payload(
             "modifiedByUserId": (fields.get("modifiedBy") or {}).get("userId"),
             "assignedToRoleId": (fields.get("assignedTo") or {}).get("roleId"),
             "assignedToRoleName": (fields.get("assignedTo") or {}).get("roleName"),
-            "currentResponsibleUserId": (fields.get("currentResponsible") or {}).get(
-                "userId"
-            ),
-            "coordinates": {"X": coordinateXYZ.get("x", "N/A"), "Y": coordinateXYZ.get("y", "N/A"), "Z": coordinateXYZ.get("z", "N/A")},
+            "currentResponsibleUserId": (fields.get("currentResponsible") or {}).get("userId"),
+            "coordinates": {
+                "X": coordinateXYZ.get("x", "N/A"),
+                "Y": coordinateXYZ.get("y", "N/A"),
+                "Z": coordinateXYZ.get("z", "N/A"),
+            },
             # "levelName": level.get("name", "N/A"),
             # "buildingName": building.get("name", "N/A"),
-
         }
         items.append(item)
 
@@ -305,11 +284,7 @@ def transform_task_changes_collection_payload(
 def transform_users_collection_payload(payload: object, project_label: str) -> dict:
     users, links, metadata = _extract_collection_payload(payload)
     items = [_normalize_user_object(user) for user in users]
-    summary = (
-        f"Found {len(items)} user(s) for {project_label}."
-        if items
-        else f"No users found for {project_label}."
-    )
+    summary = f"Found {len(items)} user(s) for {project_label}." if items else f"No users found for {project_label}."
     return {
         "summary": summary,
         "data": {"items": items},
@@ -319,16 +294,8 @@ def transform_users_collection_payload(payload: object, project_label: str) -> d
 
 
 def transform_user_payload(payload: object, user_id: str, project_label: str) -> dict:
-    user = (
-        _normalize_user_object(payload)
-        if isinstance(payload, dict) and payload
-        else None
-    )
-    summary = (
-        f"Found user for {project_label}."
-        if user
-        else f"No user found for userId {user_id} in {project_label}."
-    )
+    user = _normalize_user_object(payload) if isinstance(payload, dict) and payload else None
+    summary = f"Found user for {project_label}." if user else f"No user found for userId {user_id} in {project_label}."
     return {
         "summary": summary,
         "data": {"user": user},

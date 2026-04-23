@@ -2,18 +2,16 @@ from __future__ import annotations
 
 from fastapi import FastAPI
 
-from mcp_dalux.logging_setup import configure_logging
 from mcp_dalux.api.routes_health import router as health_router
 from mcp_dalux.api.routes_sessions import router as sessions_router
 
 
-configure_logging()
-
-app = FastAPI(
-	title="Dalux HTTP API",
-	version="0.1.0",
-	description="HTTP entrypoint for the online Dalux integration.",
-)
+def create_http_app() -> FastAPI:
+    app = FastAPI(
+		title="Dalux HTTP API",
+		version="0.1.0",
+		description="HTTP entrypoint for the online Dalux integration.",
+	)
 
 # Register routers here once they exist. Keep this file focused on assembling the API application.
 
@@ -31,5 +29,9 @@ app = FastAPI(
 # The HTTP layer should not know how prompts are processed internally;
 # it should just validate input, call a service, and return structured output.
 
-app.include_router(health_router)
-app.include_router(sessions_router)
+    app.include_router(health_router)
+    app.include_router(sessions_router)
+    return app
+
+
+app = create_http_app()
