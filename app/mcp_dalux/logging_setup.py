@@ -51,8 +51,7 @@ def attach_file_handler(
     log_path = LOG_DIR / log_filename
 
     has_file_handler = any(
-        isinstance(handler, logging.FileHandler)
-        and Path(getattr(handler, "baseFilename", "")).resolve() == log_path.resolve()
+        isinstance(handler, logging.FileHandler) and Path(getattr(handler, "baseFilename", "")).resolve() == log_path.resolve()
         for handler in logger.handlers
     )
 
@@ -62,7 +61,7 @@ def attach_file_handler(
         logger.addHandler(file_handler)
 
 
-def append_structured_event(
+def append_structured_log_event(
     log_filename: str,
     source: str,
     event: str,
