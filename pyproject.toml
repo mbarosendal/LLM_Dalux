@@ -33,3 +33,15 @@ package-dir = {"" = "app"}
 [tool.setuptools.packages.find]
 where = ["app"]
 include = ["mcp_dalux*"]
+
+[tool.ruff]
+line-length = 150
+target-version = "py313"
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
