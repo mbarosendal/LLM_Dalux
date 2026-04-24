@@ -11,7 +11,7 @@ from mcp_dalux.llm.contracts import AgentDecision
 from mcp_dalux.llm.services.instructions_service import build_runtime_instructions
 from mcp_dalux.llm.services.tool_operations import execute_tool_operation
 from mcp_dalux.llm.services.tool_registry import get_tool_names, has_tool
-from mcp_dalux.orchestration import SessionContext
+from mcp_dalux.mcp_setup import SessionContext
 
 logger = logging.getLogger(__name__)
 

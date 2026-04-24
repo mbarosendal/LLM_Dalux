@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 from uuid import uuid4
 
 from mcp_dalux.api.schemas import CreateSessionResponse
-from mcp_dalux.orchestration import SessionContext
+from mcp_dalux.mcp_setup import SessionContext
 
 
 class SessionNotFoundError(ValueError):
