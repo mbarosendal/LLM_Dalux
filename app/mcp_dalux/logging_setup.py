@@ -7,6 +7,7 @@ from pathlib import Path
 
 LOG_DIR = Path(__file__).resolve().parents[2] / "logs"
 DEFAULT_CLIENT_LOG_NAME = "client_debug.log"
+STATUS_DEBUG_LOG_NAME = "status_debug.log"
 
 
 def configure_logging() -> None:

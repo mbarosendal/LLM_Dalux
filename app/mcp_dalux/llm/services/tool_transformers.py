@@ -3,6 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
+from mcp_dalux.logging_setup import STATUS_DEBUG_LOG_NAME, append_structured_log_event
+
+LOG_ONLY_LATEST_TASK_CHANGES = True
+
 # Extractor methods
 
 
@@ -100,25 +104,25 @@ def infer_task_change_status(
     status_value = (status or "").strip().lower()
 
     if action_value == "approve" and has_description:
-        return 'approved, with follow up ("godkendt, med opfølgning")'
+        return 'Godkendt, med opfølgning")'
     if action_value == "approve" and status_value == "closed":
-        return 'approved ("godkendt")'
+        return "Godkendt"
     # if action_value == "assign" and has_description:
     #     return "new"
     if action_value == "assign" and status_value == "open":
-        return 'new and ongoing ("nye og igangværende")'  # Combined status for now.
+        return "Nye og igangværende"  # Combined status for now.
     if action_value == "update" and has_description:
-        return 'ongoing, with update ("igangværende, med opdatering")'  # + ", with follow up" ?
+        return "Nye og igangværende"
     if action_value == "reject" and status_value == "open":
-        return 'rejected ("afvist")'
+        return "Afvist"
     if action_value == "complete" and status_value == "open":
-        return 'ready ("klarmeldt")'
+        return "Klarmeldt"
     # if action_value == "other" and status_value == "closed":
     #     return "archived"
     if action_value == "other" and status_value == "closed":
-        return 'archived and expired ("arkiveret og udgået")'  # Combined status for now.
+        return "Arkiveret og udgået"  # Combined status for now.
     if status_value in {"closed", "open"}:
-        return "unknown"
+        return "Ukendt"
     return "unknown"
 
 
@@ -127,28 +131,31 @@ def _status_priority(item: dict) -> int:
     return 2 if status == "closed" else 1 if status == "open" else 0
 
 
-def _find_latest_change(item: dict, task_latest: dict[str, dict]) -> None:
+def _find_latest_change(item: dict, task_latest: dict[str, dict]) -> bool:
     task_id = item.get("taskId")
     timestamp = item.get("timestamp")
 
     if not task_id or not timestamp:
-        return
+        return False
 
     existing = task_latest.get(task_id)
 
     # First time we see this new task
     if not existing:
         task_latest[task_id] = item
-        return
+        return True
 
     old_timestamp = existing.get("timestamp")
     if not old_timestamp:
         task_latest[task_id] = item
-        return
+        return True
 
     # New item wins if timestamp is newer, or if same timestamp but higher status priority (closed > open).
     if timestamp > old_timestamp or (timestamp == old_timestamp and _status_priority(item) >= _status_priority(existing)):
         task_latest[task_id] = item
+        return True
+
+    return False
 
 
 # Per-tool orchestrators to build final tool responses after extracting and normalizing data using the above methods
@@ -190,9 +197,7 @@ def transform_workpackages_collection_payload(
     workpackages, links, metadata = _extract_collection_payload(payload)
     items = [_normalize_workpackage_object(item) for item in workpackages]
 
-    summary = (
-        f"Found {len(items)} workpackage(s) for {project_label}." if items else f"No workpackages found for {project_label}."
-    )
+    summary = f"Found {len(items)} workpackage(s) for {project_label}." if items else f"No workpackages found for {project_label}."
 
     return {
         "summary": summary,
@@ -267,11 +272,26 @@ def transform_task_changes_collection_payload(payload: object, project_label: st
         for task_id, latest in task_latest.items()
     ]
 
-    changes_summary = (
-        f"Found {len(items)} task change event(s) for {project_label}."
-        if items
-        else f"No task changes found for {project_label}."
-    )
+    # Log only the latest change for each task when the debug flag is enabled.
+    for item in items:
+        task_id = item.get("taskId")
+        if not task_id:
+            continue
+        if LOG_ONLY_LATEST_TASK_CHANGES and task_latest.get(task_id) is not item:
+            continue
+
+        append_structured_log_event(
+            log_filename=STATUS_DEBUG_LOG_NAME,
+            source="infer_task_change_status",
+            event="task_change_status",
+            payload={
+                "taskId": task_id,
+                "statusState": "current/newest",
+                "inferredStatus": item.get("inferredStatus", "unknown"),
+            },
+        )
+
+    changes_summary = f"Found {len(items)} task change event(s) for {project_label}." if items else f"No task changes found for {project_label}."
 
     return {
         "summary": changes_summary,
