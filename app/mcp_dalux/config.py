@@ -23,6 +23,9 @@ class Config:
     # HTTP server config (for web API mode).
     HOST = os.getenv("HOST", "127.0.0.1")
     PORT = int(os.getenv("PORT", "8001"))
+    API_AUTH_TOKEN = os.getenv("API_AUTH_TOKEN")
+    TRUSTED_HOSTS = [host.strip() for host in os.getenv("TRUSTED_HOSTS", "localhost,127.0.0.1,[::1]").split(",") if host.strip()]
+    CORS_ALLOW_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ALLOW_ORIGINS", "").split(",") if origin.strip()]
 
     # Limit of agent rounds (one full cycle of tool usage) to prevent infinite loops.
     MAX_AGENT_ROUNDS = 2
@@ -43,6 +46,10 @@ class Config:
             raise ValueError("APP_MODE must be either 'web_api' or 'mcp'.")
         if cls.APP_MODE == "mcp" and cls.MCP_TRANSPORT not in {"stdio", "http", "sse", "streamable-http"}:
             raise ValueError("MCP_TRANSPORT must be either 'stdio', 'http', 'sse', or 'streamable-http'.")
+        if cls.APP_MODE == "web_api" and not cls.API_AUTH_TOKEN:
+            raise ValueError("API_AUTH_TOKEN is required when APP_MODE is 'web_api'.")
+        if not cls.TRUSTED_HOSTS:
+            raise ValueError("TRUSTED_HOSTS must include at least one host.")
         if cls.LLM_PROVIDER not in {"claude", "mock", "gemini"}:
             raise ValueError("LLM_PROVIDER must be one of: claude, mock, gemini.")
         if not cls.DALUX_BASE_URL:
