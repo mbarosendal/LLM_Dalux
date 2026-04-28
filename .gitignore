@@ -17,3 +17,7 @@ __pycache__
 /.vscode/
 /logs/
 app/mcp_dalux/language_model/instructions/__init__.py
+
+
+# Exclude isolated test script
+test-api.ps1
