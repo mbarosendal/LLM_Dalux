@@ -8,7 +8,7 @@ from mcp_dalux.api.services.agent_service import (
     build_runtime_instructions_for_http,
     run_agent_loop,
 )
-from mcp_dalux.api.services.session_service import build_session_context, update_session_end_time
+from mcp_dalux.api.services.session_service import get_session_state, update_session_end_time
 from mcp_dalux.policies.input_policy import InputPolicy
 
 logger = logging.getLogger(__name__)
@@ -40,7 +40,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
     if not InputPolicy.validate_prompt(processed_text):
         raise PromptValidationError("Prompt validation failed")
 
-    session_context = build_session_context(prompt_input.session_id)
+    session_state = get_session_state(prompt_input.session_id)
     # logger.info(
     #     "Loaded session context session_id=%s category=%s project_name=%s",
     #     prompt_input.session_id,
@@ -48,7 +48,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
     #     session_context.project_name,
     # )
 
-    runtime_instructions = build_runtime_instructions_for_http(session_context)
+    runtime_instructions = build_runtime_instructions_for_http(session_state)
     scope_key = f"http-session:{prompt_input.session_id}"
 
     try:
@@ -58,6 +58,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
             scope_key,
         )
     except Exception as exc:
+        logger.exception("LLM request failed for session_id=%s", prompt_input.session_id)
         raise LLMError(f"LLM request failed: {exc}") from exc
 
     end_time = update_session_end_time(prompt_input.session_id)

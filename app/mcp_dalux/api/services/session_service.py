@@ -1,10 +1,12 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from uuid import uuid4
 
 from mcp_dalux.api.schemas import CreateSessionResponse
-from mcp_dalux.mcp_setup import SessionContext
+from mcp_dalux.session_models import (
+    SessionState,
+    create_session_state,
+)
 
 
 class SessionNotFoundError(ValueError):
@@ -12,33 +14,29 @@ class SessionNotFoundError(ValueError):
 
 
 # In-memory store for active sessions. In production, this would be a database.
-_active_sessions: dict[str, dict] = {}
+_active_sessions: dict[str, SessionState] = {}
+
+
+def _to_create_session_response(session_state: SessionState) -> CreateSessionResponse:
+    """Map internal SessionState to HTTP response contract."""
+
+    return CreateSessionResponse(
+        session_id=session_state.session_id,
+        start_time=session_state.start_time.isoformat(),
+        end_time=session_state.end_time.isoformat(),
+        project_name=session_state.project_name,
+        category=session_state.category,
+        subject=session_state.subject or "",
+    )
 
 
 # Add async+await if we need to do any I/O here later (e.g., database calls, external service calls). For now, it's all in-memory.
 def create_session_response(project_name: str, category: str) -> CreateSessionResponse:
-    """Create a session with generated runtime values and store it."""
+    """Create SessionState, persist it, and map to HTTP response contract."""
 
-    now_utc = datetime.now(UTC)
-
-    session_id = str(uuid4())
-
-    # Store session in runtime memory
-    _active_sessions[session_id] = {
-        "project_name": project_name,
-        "category": category,
-        "start_time": now_utc.isoformat(),
-        "end_time": now_utc.isoformat(),
-    }
-
-    return CreateSessionResponse(
-        session_id=session_id,
-        start_time=now_utc.isoformat(),
-        end_time=now_utc.isoformat(),
-        project_name=project_name,
-        category=category,
-        subject="Example Subject",
-    )
+    session_state = create_session_state(project_name=project_name, category=category)
+    _active_sessions[session_state.session_id] = session_state
+    return _to_create_session_response(session_state)
 
 
 def check_session_exists(session_id: str) -> bool:
@@ -46,8 +44,8 @@ def check_session_exists(session_id: str) -> bool:
     return session_id in _active_sessions
 
 
-def get_session(session_id: str) -> dict:
-    """Retrieve session metadata if it exists."""
+def get_session(session_id: str) -> SessionState:
+    """Retrieve internal SessionState if it exists."""
 
     if not check_session_exists(session_id):
         raise SessionNotFoundError("Session does not exist or is not active")
@@ -58,25 +56,13 @@ def get_session(session_id: str) -> dict:
 def update_session_end_time(session_id: str) -> str:
     """Update end time for a session and return the persisted ISO timestamp."""
 
-    if not check_session_exists(session_id):
-        raise SessionNotFoundError("Session does not exist or is not active")
+    session_state = get_session(session_id)
+    session_state.end_time = datetime.now(UTC)
 
-    now_utc = datetime.now(UTC)
-    end_time_iso = now_utc.isoformat()
-    _active_sessions[session_id]["end_time"] = end_time_iso
-
-    return end_time_iso
+    return session_state.end_time.isoformat()
 
 
-def build_session_context(session_id: str) -> SessionContext:
-    """Load session data and build a SessionContext object."""
+def get_session_state(session_id: str) -> SessionState:
+    """Load SessionState for runtime use by prompt/agent flow."""
 
-    session_data = get_session(session_id)
-
-    return SessionContext(
-        start_time=datetime.fromisoformat(session_data["start_time"]),
-        end_time=datetime.fromisoformat(session_data["end_time"]),
-        category=session_data["category"],
-        project_name=session_data["project_name"],
-        subject=session_data.get("subject"),
-    )
+    return get_session(session_id)

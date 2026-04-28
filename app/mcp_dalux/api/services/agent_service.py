@@ -11,7 +11,7 @@ from mcp_dalux.llm.contracts import AgentDecision
 from mcp_dalux.llm.services.instructions_service import build_runtime_instructions
 from mcp_dalux.llm.services.tool_operations import execute_tool_operation
 from mcp_dalux.llm.services.tool_registry import get_tool_names, has_tool
-from mcp_dalux.mcp_setup import SessionContext
+from mcp_dalux.session_models import SessionState
 
 logger = logging.getLogger(__name__)
 
@@ -20,13 +20,13 @@ _adapter = DaluxAdapter()
 _available_tools = get_tool_names()
 
 
-def build_runtime_instructions_for_http(session_context: SessionContext) -> str:
+def build_runtime_instructions_for_http(session_state: SessionState) -> str:
     """Build runtime instructions for HTTP agent turns."""
     return build_runtime_instructions(
-        category=session_context.category,
-        project_id=session_context.project_id,
-        project_name=session_context.project_name,
-        subject=session_context.subject,
+        category=session_state.category,
+        project_id=session_state.project_id,
+        project_name=session_state.project_name,
+        subject=session_state.subject,
         actor_user_id=Config.DALUX_USER_ID,
     )
 

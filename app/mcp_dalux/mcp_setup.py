@@ -1,7 +1,3 @@
-from dataclasses import dataclass
-from datetime import datetime
-from typing import Literal
-
 from fastmcp import FastMCP
 
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
@@ -10,33 +6,12 @@ from mcp_dalux.llm.services.instructions_service import build_runtime_instructio
 from mcp_dalux.llm.tools.dalux_tools_tasks import register_dalux_tools_tasks
 from mcp_dalux.llm.tools.dalux_tools_users import register_dalux_tools_users
 from mcp_dalux.llm.tools.dalux_tools_workpackages import register_dalux_tools_workpackages
+from mcp_dalux.session_models import SessionState, get_default_session_state
 
 
-@dataclass(slots=True)
-class SessionContext:
-    """Session information used to compose runtime instructions."""
-
-    start_time: datetime
-    category: Literal["tasks", "files"] = "tasks"
-    end_time: datetime | None = None
-    project_name: str | None = None
-    project_id: str | None = None
-    subject: str | None = None
-
-
-def get_default_session_context() -> SessionContext:
-    """Dummy session context used for stdio/MCP startup."""
-    return SessionContext(
-        start_time=datetime.now(),
-        project_name="PLACEHOLDER: to be user to look up projectId via API after rollout to more projects",
-        category="tasks",
-        subject="PLACEHOLDER: Set dynamically by LLM after session starts (or by session context values)",
-    )
-
-
-def create_mcp_server(session_context: SessionContext | None = None) -> FastMCP:
+def create_mcp_server(session_state: SessionState | None = None) -> FastMCP:
     """Create and configure the FastMCP server with registered tools."""
-    active_session = session_context or get_default_session_context()
+    active_session = session_state or get_default_session_state()
 
     mcp = FastMCP(
         name="dalux-mcp",
