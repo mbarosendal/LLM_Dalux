@@ -30,4 +30,5 @@ class SendPromptRequest(BaseModel):
 class SendPromptResponse(BaseModel):
     session_id: str = Field(..., description="Session ID (UUID)")
     timestamp: str = Field(..., description="Response timestamp")
+    model: str = Field(..., description="Model that generated the response")
     text: str = Field(..., description="Response text")
