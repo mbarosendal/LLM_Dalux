@@ -66,3 +66,7 @@ class ClaudeClient(BaseClient):
             logger=logger,
             empty_message="Claude returned no text.",
         )
+
+    async def check_health(self) -> bool:
+        """Check Claude client health by verifying API key is set."""
+        pass

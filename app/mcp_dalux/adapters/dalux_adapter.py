@@ -1,3 +1,6 @@
+import asyncio
+
+from fastapi import logger
 import httpx
 
 from mcp_dalux.config import Config
@@ -73,3 +76,12 @@ class DaluxAdapter:
         """GET /1.0/projects/{projectId}/workpackages"""
         project_id = self._enforce_project_constraints(project_id)
         return self._execute_get(f"/1.0/projects/{project_id}/workpackages")
+
+    def check_connectivity(self) -> bool:
+        """Verify connectivity to Dalux API with a minimal request."""
+        try:
+            project_id = self._enforce_project_constraints()
+            self._execute_get(f"/5.0/projects/{project_id}")
+            return True
+        except Exception:
+            return False

@@ -4,6 +4,12 @@ from dataclasses import dataclass, field
 from typing import Literal
 
 
+class LLMError(RuntimeError):
+    """Raised when there's an error communicating with a language model."""
+
+    pass
+
+
 @dataclass(slots=True)
 class ToolRequest:
     """Internal request for a tool invocation requested by the model."""

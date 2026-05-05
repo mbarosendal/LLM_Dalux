@@ -47,3 +47,7 @@ class MockClient(BaseClient):
             response=f"Mock answer: {text}",
             raw_output="mock-answer",
         )
+
+    async def check_health(self) -> bool:
+        """Mock client is always healthy."""
+        return True
