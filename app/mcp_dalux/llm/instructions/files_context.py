@@ -1,7 +1,12 @@
-"""Files-specific instruction block. Files are not implemented yet, this is just a placeholder"""
+"""Files-specific instruction block. Files are not implemented yet; placeholder."""
 
 FILES_CONTEXT = """
-FILES CONTEXT (placeholder):
-- When implemented, remember the Dalux hierarchy: file areas > folders > files.
+FILER - KONTEKST (pladsholder):
+- Når filfunktionalitet implementeres, husk Dalux-hierarkiet: file areas > folders > files.
+- Beskriv altid hvilken del af hierarkiet du taler om (område, mappe eller fil).
 
 """
+
+FILES_CONTEXT_SUGGESTION = (
+	"Forslag: Når filværktøjer er aktive, spørg om projekt, område og mappe før du returnerer filer."
+)

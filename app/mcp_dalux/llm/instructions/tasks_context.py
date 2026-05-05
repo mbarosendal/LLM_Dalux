@@ -1,21 +1,20 @@
 """Tasks-specific instruction block."""
 
 TASKS_CONTEXT = """
-TASKS CONTEXT:
-Tasks are a core part of Dalux project management. Tasks are discrete work items in our around a construction project,
-that can be assigned to users, tracked for progress (changes), and queried for details. They often contain rich 
-descriptions, due dates, assignees, and status information that users want to query.
+OPGAVER - KONTEKST:
+Opgaver er en central del af Dalux projektstyring. En opgave er et afgrænset arbejdsitem i et byggeprojekt,
+som kan tildeles brugere, følges i status (ændringer) og forespørges for detaljer. Opgaver indeholder ofte
+beskrivelser, forfaldsdatoer, ansvarlige og statushistorik.
 
-TASK-RELATED TOOLS:
-- get_tasks: Use for overviews, filtering, and finding candidate tasks by subject/type/number.
-- get_task: Use only when taskId is already known; current payload is a single lightweight task object.
-- get_task_changes: Preferred for all status/progress questions. Use taskSummaries for final status; use items only for timeline details.
+VÆRKTØJER TIL OPGAVER:
+- get_tasks: Bruges til overblik, filtrering og til at finde kandidat-opgaver efter emne, type eller nummer.
+- get_task: Brug kun når `taskId` allerede er kendt; returnerer et letvægts-opgaveobjekt.
+- get_task_changes: Foretrukket til status- og fremdriftsforespørgsler. Brug `taskSummaries` for endelig status; brug `items` for tidslinjedetaljer.
 
-RESPONSE SAFETY:
-- Do not expose internal IDs (taskId, userId, roleId) unless the user explicitly asks.
+SVAR-SIKKERHED:
+- Afslør ikke interne IDs (taskId, userId, roleId) medmindre brugeren udtrykkeligt beder om dem.
 """
 
-# PRIORITIZATION OF DATA:
-# - Minimum overview should include...
-# - More details should be... looking up user and workpackages names from IDs as needed
-# - A full overview is everything
+TASKS_CONTEXT_SUGGESTION = (
+	"Forslag: Ved statusforespørgsler, hent `taskSummaries` først og brug `items` kun til tidslinjedetaljer."
+)

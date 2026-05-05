@@ -15,40 +15,50 @@ _TOOL_SPECS: dict[str, ToolSpec] = {
     "get_current_user_context": ToolSpec(
         name="get_current_user_context",
         description="Resolve current user context for personal queries.",
-        usage="Call this first for 'my/me/mine' requests to anchor the actor user.",
+        usage="Call this first for 'my/me/mine' requests to anchor the actor user and then filter results by that user.",
         arguments_hint="project_id is optional.",
     ),
     "get_tasks": ToolSpec(
         name="get_tasks",
         description="List tasks for discovery and filtering.",
-        usage="Use for overview/search; use get_task_changes for status answers.",
-        arguments_hint="project_id and bookmark are optional.",
+        usage="Use for task overviews, counts, searches, and picking candidate tasks by subject/type/number. For current or final status, prefer get_task_changes. Use it as the discovery step before any status question.",
+        arguments_hint="project_id and bookmark are optional. Returns lightweight fields such as taskId, subject, typeName, number, created, and createdByUserId.",
     ),
     "get_task_changes": ToolSpec(
         name="get_task_changes",
         description="List task change events and inferred statuses.",
-        usage="Always prioritize inferredStatus over inferring status from raw events. Match status names to user_prompts when possible.",
-        arguments_hint="project_id and bookmark are optional.",
+        usage="Primary tool for task progress, open vs closed, and final status. Use taskSummaries as the source of truth for status answers. Use items only for timelines or detail questions. Do not re-infer status if inferredStatus or finalStatus is present.",
+        arguments_hint="project_id and bookmark are optional. Returns both event-level items and taskSummaries with latest status information.",
     ),
     "get_users": ToolSpec(
         name="get_users",
         description="List users for lookup and matching.",
-        usage="Use for discovery by name/company; use get_user for known IDs.",
+        usage="Use for discovery by name/company. Use get_user only when a specific userId is already known.",
         arguments_hint="project_id is optional.",
     ),
     "get_user": ToolSpec(
         name="get_user",
-        description="Get one user by known user_id.",
-        usage="Use only when user_id is known.",
+        description="Get one user by known userId.",
+        usage="Use only when userId is already known and you need a single-user lookup.",
         arguments_hint="user_id is required, project_id is optional.",
     ),
     "get_workpackages": ToolSpec(
         name="get_workpackages",
         description="List workpackages for discovery and matching.",
-        usage="Use for workpackage lookup and identifier matching.",
+        usage="Use for workpackage lookup and identifier matching when the user asks about workpackages or related filters.",
         arguments_hint="project_id is optional.",
     ),
 }
+
+
+_TASK_GUIDANCE = """TASK ANSWERING PLAYBOOK:
+- For broad overviews, start with get_tasks.
+- For status/progress/final state, use get_task_changes and answer from taskSummaries.
+- For timeline/history, use the items list from get_task_changes.
+- If the user asks for a random task, pick one from get_tasks and then inspect it with get_task_changes.
+- Do not expose internal IDs unless the user explicitly asks for them.
+- When the user asks for a status overview, summarize by status category instead of echoing raw rows.
+"""
 
 
 def get_tool_names() -> list[str]:
@@ -75,6 +85,9 @@ def render_tool_context(tool_names: list[str] | None = None) -> str:
         lines.append(f"- {spec.name}: {spec.description}")
         lines.append(f"  Usage: {spec.usage}")
         lines.append(f"  Args: {spec.arguments_hint}")
+    if any(name in {"get_tasks", "get_task_changes"} for name in names):
+        lines.append("")
+        lines.append(_TASK_GUIDANCE.strip())
     return "\n".join(lines)
 
 

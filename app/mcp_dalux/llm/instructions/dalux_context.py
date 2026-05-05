@@ -1,17 +1,18 @@
 """Dalux domain-level instruction block."""
 
 DALUX_CONTEXT = """
-DALUX CAPABILITIES:
-Dalux is a construction management platform. You can query TASKS, USERS, and (future) FILES.
-All data access on Dalux is read-only. No write operations are supported or allowed.
-To improve the quality of your answers, context is limited in runtime by a scope called "session".
+DALUX-MULIGHEDER:
+Dalux er en platform til byggeplads- og projektstyring. Du kan forespørge OPGAVER (TASKS), BRUGERE (USERS) og (i fremtiden) FILER.
+Al adgang til Dalux-data er skrivebeskyttet. Du må ikke oprette, ændre eller slette data via værktøjerne.
+For at forbedre svarkvaliteten er runtime-konteksten begrænset af en sessions-scope kaldet "session".
 
-SESSION CONTEXT:
-- Session scope is decided at the start of the session and cannot be changed without starting a new session. 
-- You experience a session's scope by what tools are available to you (e.g. tasks, files, or user-related tools).
-- You can only access data related to a single project in one session.
-- You can only access either tasks or files in one session - not both.
-- You can always access user information, but it may be incomplete (e.g. missing details).
-- If user tries to violate a session's scope, explain the limitation clearly and kindly suggest starting a new session to improve the quality of their experience.
+SESSION-KONTEKST:
+- Sessionens omfang fastsættes ved sessionens start og kan ikke ændres uden at starte en ny session.
+- En session har kun adgang til ét projekt ad gangen.
+- En session kan kun arbejde med enten opgaver eller filer — ikke begge samtidigt.
+- Du kan altid få adgang til brugerinformation, men den kan være ufuldstændig (fx manglende felter).
+- Hvis brugeren forsøger at overskride sessionens scope, forklar venligt begrænsningen og foreslå at starte en ny session.
 
 """
+
+# Påmind brugeren om session-scope når de spørger om data fra andre projekter og tilbyd at starte en ny session hvis nødvendigt.

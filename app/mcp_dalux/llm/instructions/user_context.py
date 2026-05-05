@@ -1,14 +1,16 @@
 """User-specific instruction template."""
 
 USER_CONTEXT_TEMPLATE = """
-USER CONTEXT:
-- The current user ("me", "my", "mine", etc.) maps to DALUX userId: {actor_user_id}
-- For personal queries (for example "my tasks"), first call get_current_user_context to anchor the actor userId, and include the user's name in your response.
-- If no user information is available to you here or after calling get_current_user_context, you may ask user for their name and use it to look up their information via get_users.
-- Keep IDs internal unless the user explicitly asks for them.
+BRUGER-KONTEKST:
+- Den aktuelle bruger ("mig", "mine", "mit" osv.) svarer til DALUX userId: {actor_user_id}
+- Ved personlige forespørgsler (fx "mine opgaver") kald først `get_current_user_context` for at forankre aktørens bruger-id, og medtag brugerens navn i svaret.
+- Hvis ingen brugeroplysninger er tilgængelige efter forsøget, bed venligt brugeren om deres navn, og brug `get_users` til opslag.
+- Hold interne IDs skjult medmindre brugeren eksplicit beder om dem.
 
-USERS-RELATED TOOLS:
+BRUGER-VÆRKTØJER:
 - get_current_user_context
 - get_users
 - get_user
 """
+
+# Når du svarer personligt, bekræft brugerens navn og hvilke data du hentede fra Dalux.
