@@ -44,7 +44,7 @@ def execute_tool_request(
     return execute_tool_operation(adapter, tool_name, arguments, scope_key)
 
 
-async def _dispatch_tools(
+async def _dispatch_tool_requests(
     decision: AgentDecision,
     scope_key: str,
 ) -> list[dict[str, object]]:
@@ -88,10 +88,11 @@ async def run_agent_loop(
 
         if decision.mode == "answer":
             logger.info("Agent loop completed with final answer")
-            return decision.message
+            return decision.response
 
+        # JSON is either the presentation of data from tool_presenters.py or an error from make_error_response.
         if decision.mode == "tools" and decision.tool_requests:
-            tool_results = await _dispatch_tools(decision, scope_key)
+            tool_results = await _dispatch_tool_requests(decision, scope_key)
             current_text = "Tool results (JSON):\n" + json.dumps(tool_results, indent=2) + "\nPlease provide the final answer."
             continue
 
