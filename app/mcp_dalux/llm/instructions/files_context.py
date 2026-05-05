@@ -7,6 +7,5 @@ FILER - KONTEKST (pladsholder):
 
 """
 
-FILES_CONTEXT_SUGGESTION = (
-	"Forslag: Når filværktøjer er aktive, spørg om projekt, område og mappe før du returnerer filer."
-)
+# Når filværktøjer er aktive, spørg om projekt, område og mappe før du returnerer filer.
+

@@ -21,3 +21,4 @@ app/mcp_dalux/language_model/instructions/__init__.py
 
 # Exclude isolated test script
 test-api.ps1
+test-api - 05-05-2026✔️ .ps1

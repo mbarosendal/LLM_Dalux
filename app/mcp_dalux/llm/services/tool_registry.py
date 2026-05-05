@@ -53,11 +53,9 @@ _TOOL_SPECS: dict[str, ToolSpec] = {
 
 _TASK_GUIDANCE = """TASK ANSWERING PLAYBOOK:
 - For broad overviews, start with get_tasks.
-- For status/progress/final state, use get_task_changes and answer from taskSummaries.
+- For status/changes/progress/final state, use get_task_changes and answer from taskSummaries.
 - For timeline/history, use the items list from get_task_changes.
-- If the user asks for a random task, pick one from get_tasks and then inspect it with get_task_changes.
 - Do not expose internal IDs unless the user explicitly asks for them.
-- When the user asks for a status overview, summarize by status category instead of echoing raw rows.
 """
 
 

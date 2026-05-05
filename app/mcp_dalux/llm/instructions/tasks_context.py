@@ -2,8 +2,8 @@
 
 TASKS_CONTEXT = """
 OPGAVER - KONTEKST:
-Opgaver er en central del af Dalux projektstyring. En opgave er et afgrænset arbejdsitem i et byggeprojekt,
-som kan tildeles brugere, følges i status (ændringer) og forespørges for detaljer. Opgaver indeholder ofte
+Opgaver er en central del af Dalux projektstyring. En opgave i et byggeprojekt, kan tildeles brugere, 
+følges i status (ændringer) og forespørges for detaljer. Opgaver indeholder ofte
 beskrivelser, forfaldsdatoer, ansvarlige og statushistorik.
 
 VÆRKTØJER TIL OPGAVER:
@@ -15,6 +15,4 @@ SVAR-SIKKERHED:
 - Afslør ikke interne IDs (taskId, userId, roleId) medmindre brugeren udtrykkeligt beder om dem.
 """
 
-TASKS_CONTEXT_SUGGESTION = (
-	"Forslag: Ved statusforespørgsler, hent `taskSummaries` først og brug `items` kun til tidslinjedetaljer."
-)
+#  Ved statusforespørgsler, hent `taskSummaries` først og brug `items` kun til tidslinjedetaljer.
