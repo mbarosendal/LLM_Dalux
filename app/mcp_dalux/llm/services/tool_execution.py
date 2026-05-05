@@ -13,13 +13,13 @@ logger = get_file_logger(__name__, TOOL_LOG_FILE)
 
 
 @dataclass(frozen=True)
-class ToolContext:
+class ToolExecutionContext:
     tool_name: str
     project_label: str
     request_payload: dict
 
 
-def execute_tool(context: ToolContext, action: Callable[[], dict]) -> dict:
+def execute_tool(context: ToolExecutionContext, action: Callable[[], dict]) -> dict:
     """Run a tool action with centralized logging, debug dumping, and error handling."""
     append_structured_log_event(
         log_filename=TOOL_LOG_FILE,

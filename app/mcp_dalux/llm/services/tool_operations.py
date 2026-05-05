@@ -4,7 +4,7 @@ from collections.abc import Callable
 
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 from mcp_dalux.config import Config
-from mcp_dalux.llm.services.tool_execution import ToolContext, execute_tool
+from mcp_dalux.llm.services.tool_execution import ToolExecutionContext, execute_tool
 from mcp_dalux.llm.services.tool_presenters import make_tool_response
 from mcp_dalux.llm.services.tool_transformers import (
     transform_task_changes_collection_payload,
@@ -57,7 +57,7 @@ def _run_get_tasks(
         )
 
     return execute_tool(
-        ToolContext(
+        ToolExecutionContext(
             tool_name=tool_name,
             project_label=project_label,
             request_payload={"project_id": project_id, "bookmark": bookmark},
@@ -91,7 +91,7 @@ def _run_get_task_changes(
         )
 
     return execute_tool(
-        ToolContext(
+        ToolExecutionContext(
             tool_name=tool_name,
             project_label=project_label,
             request_payload={"project_id": project_id, "bookmark": bookmark},
@@ -124,7 +124,7 @@ def _run_get_users(
         )
 
     return execute_tool(
-        ToolContext(
+        ToolExecutionContext(
             tool_name=tool_name,
             project_label=project_label,
             request_payload={"project_id": project_id},
@@ -156,7 +156,7 @@ def _run_get_user(
         )
 
     return execute_tool(
-        ToolContext(
+        ToolExecutionContext(
             tool_name=tool_name,
             project_label=project_label,
             request_payload={"project_id": project_id, "user_id": user_id},
@@ -192,7 +192,7 @@ def _run_get_current_user_context(
         )
 
     return execute_tool(
-        ToolContext(
+        ToolExecutionContext(
             tool_name=tool_name,
             project_label=project_label,
             request_payload={"project_id": project_id},
@@ -225,7 +225,7 @@ def _run_get_workpackages(
         )
 
     return execute_tool(
-        ToolContext(
+        ToolExecutionContext(
             tool_name=tool_name,
             project_label=project_label,
             request_payload={"project_id": project_id},
@@ -234,8 +234,10 @@ def _run_get_workpackages(
     )
 
 
+# Define the public interface for tool execution that can be used by the agent loop and is decoupled from the specific tool implementations..
 _ToolHandler = Callable[[DaluxAdapter, dict[str, object], str], dict]
 
+# Map raw tool names to their corresponding handler functions. This central registry allows for consistent execution and easy extension of new tools.
 _TOOL_HANDLERS: dict[str, _ToolHandler] = {
     "get_tasks": _run_get_tasks,
     "get_task_changes": _run_get_task_changes,
