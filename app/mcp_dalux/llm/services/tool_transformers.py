@@ -55,7 +55,7 @@ def _normalize_task_object(task: dict) -> dict:
         "subject": task.get("subject", "No subject"),
         "typeName": type_info.get("name", "N/A"),
         "number": task.get("number", "N/A"),
-        "created": convert_to_danish_time(task.get("created", "N/A")),
+        "created": _convert_to_danish_time(task.get("created", "N/A")),
         "createdByUserId": created_by.get("userId", "N/A"),
         "workflowName": workflow.get("name", "N/A"),
         "coordinates": {
@@ -79,7 +79,7 @@ def _normalize_workpackage_object(workpackage: dict) -> dict:
 # Helper methods
 
 
-def convert_to_danish_time(iso_timestamp: str) -> str:
+def _convert_to_danish_time(iso_timestamp: str) -> str:
     if not isinstance(iso_timestamp, str) or not iso_timestamp:
         return iso_timestamp
 
@@ -94,7 +94,7 @@ def convert_to_danish_time(iso_timestamp: str) -> str:
         return iso_timestamp
 
 
-def infer_task_change_status(
+def _infer_task_change_status(
     action: str | None,
     status: str | None,
     has_description: bool,
@@ -227,7 +227,7 @@ def transform_task_changes_collection_payload(payload: object, project_label: st
         # level = location.get("level") or {}
         # building = location.get("building") or {}
 
-        inferred = infer_task_change_status(
+        inferred = _infer_task_change_status(
             action if isinstance(action, str) else None,
             status if isinstance(status, str) else None,
             bool(description),
@@ -239,7 +239,7 @@ def transform_task_changes_collection_payload(payload: object, project_label: st
             "taskId": change.get("taskId"),
             "workpackageId": fields.get("workpackageId") or "",
             "deadline": deadline_value,
-            "timestamp": convert_to_danish_time(change.get("timestamp")),
+            "timestamp": _convert_to_danish_time(change.get("timestamp")),
             "action": action,
             "status": status,
             "inferredStatus": inferred,

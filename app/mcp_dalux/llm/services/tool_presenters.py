@@ -11,6 +11,7 @@ def make_tool_response(
     links: list[dict] | None = None,
     metadata: dict | None = None,
 ) -> dict:
+    """Helper to create a consistent tool response format for the LLM to consume, with optional links and metadata."""
     response = {
         "tool": tool,
         "kind": kind,
@@ -34,6 +35,7 @@ def make_error_response(
     summary: str,
     message: str,
 ) -> dict:
+    """Helper to create a consistent error response format for the LLM to consume."""
     return {
         "tool": tool,
         "kind": "error",

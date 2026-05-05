@@ -59,8 +59,8 @@ def has_tool(tool_name: str) -> bool:
     return tool_name in _TOOL_SPECS
 
 
-def get_tool_specs() -> list[ToolSpec]:
-    return list(_TOOL_SPECS.values())
+# def get_tool_specs() -> list[ToolSpec]:
+#     return list(_TOOL_SPECS.values())
 
 
 def render_tool_context(tool_names: list[str] | None = None) -> str:
@@ -79,7 +79,7 @@ def render_tool_context(tool_names: list[str] | None = None) -> str:
 
 
 def render_mcp_tool_doc(tool_name: str) -> str:
-    """Render one MCP-facing tool docstring from shared tool semantics."""
+    """Render one MCP-facing tool docstring from the tool definitions here to avoid duplicate definitions for HTTP and MCP."""
     spec = _TOOL_SPECS.get(tool_name)
     if not spec:
         return f"Tool: {tool_name}"
