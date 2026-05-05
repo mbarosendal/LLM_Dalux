@@ -17,6 +17,6 @@ class AgentDecision:
     """Internal decision returned by an LLM adapter."""
 
     mode: Literal["answer", "tools"]
-    message: str
+    response: str
     tool_requests: list[ToolRequest] = field(default_factory=list)
     raw_output: str | None = None

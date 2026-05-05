@@ -9,7 +9,7 @@ from mcp_dalux.config import Config
 from mcp_dalux.llm.clients.base_client import BaseClient
 from mcp_dalux.llm.contracts import AgentDecision
 from mcp_dalux.llm.services.decision_service import (
-    build_structured_user_prompt,
+    build_structured_user_input,
     parse_agent_decision_output,
 )
 
@@ -31,7 +31,7 @@ class ClaudeClient(BaseClient):
         instructions: str,
         tools: list[str] | None = None,
     ) -> AgentDecision:
-        user_prompt = build_structured_user_prompt(text=text, tools=tools)
+        user_prompt = build_structured_user_input(text=text, tools=tools)
 
         client = AsyncAnthropic(api_key=Config.CLAUDE_API_KEY or "")
 
@@ -57,9 +57,7 @@ class ClaudeClient(BaseClient):
             raise
 
         # Filter "blocks" in response (a flat list) by inspecting attributes on each block
-        raw_output = "\n".join(
-            block.text for block in response.content if getattr(block, "type", None) == "text" and getattr(block, "text", None)
-        )
+        raw_output = "\n".join(block.text for block in response.content if getattr(block, "type", None) == "text" and getattr(block, "text", None))
 
         # Process the text output into our internal AgentDecision format.
         return parse_agent_decision_output(

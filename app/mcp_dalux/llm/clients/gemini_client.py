@@ -10,7 +10,7 @@ from mcp_dalux.config import Config
 from mcp_dalux.llm.clients.base_client import BaseClient
 from mcp_dalux.llm.contracts import AgentDecision
 from mcp_dalux.llm.services.decision_service import (
-    build_structured_user_prompt,
+    build_structured_user_input,
     parse_agent_decision_output,
 )
 
@@ -32,7 +32,7 @@ class GeminiClient(BaseClient):
         instructions: str,
         tools: list[str] | None = None,
     ) -> AgentDecision:
-        user_prompt = build_structured_user_prompt(text=text, tools=tools)
+        user_prompt = build_structured_user_input(text=text, tools=tools)
 
         client = genai.Client(api_key=Config.GEMINI_API_KEY)
         config = types.GenerateContentConfig(

@@ -24,7 +24,7 @@ class MockClient(BaseClient):
         if "tool results:" in normalized_text:
             return AgentDecision(
                 mode="answer",
-                message="Final answer based on dispatched tool results.",
+                response="Final answer based on dispatched tool results.",
                 raw_output="mock-final-answer",
             )
 
@@ -32,7 +32,7 @@ class MockClient(BaseClient):
         if available_tools and any(keyword in normalized_text for keyword in ("tool", "lookup", "find")):
             return AgentDecision(
                 mode="tools",
-                message="I need to use a tool before answering.",
+                response="I need to use a tool before answering.",
                 tool_requests=[
                     ToolRequest(
                         tool_name=available_tools[0],
@@ -44,6 +44,6 @@ class MockClient(BaseClient):
 
         return AgentDecision(
             mode="answer",
-            message=f"Mock answer: {text}",
+            response=f"Mock answer: {text}",
             raw_output="mock-answer",
         )

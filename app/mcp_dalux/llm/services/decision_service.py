@@ -6,8 +6,8 @@ import logging
 from mcp_dalux.llm.contracts import AgentDecision, ToolRequest
 
 
-def build_structured_user_prompt(text: str, tools: list[str] | None = None) -> str:
-    """Build the provider-agnostic user prompt requesting structured JSON output."""
+def build_structured_user_input(text: str, tools: list[str] | None = None) -> str:
+    """Build the provider-agnostic user input requesting structured JSON output."""
     available_tools = tools or []
     tool_hint = ", ".join(available_tools) if available_tools else "none"
 
@@ -17,7 +17,7 @@ def build_structured_user_prompt(text: str, tools: list[str] | None = None) -> s
         " If tools are needed, set mode to tools and include tool_requests. "
         "If tools are not needed, set mode to answer and keep tool_requests empty. "
         f"Available tools: {tool_hint}. "
-        f"User prompt: {text}"
+        f"User input: {text}"
     )
 
 
@@ -34,7 +34,7 @@ def parse_agent_decision_output(
         logger.warning("%s returned empty text response", provider_name)
         return AgentDecision(
             mode="answer",
-            message=empty_message,
+            response=empty_message,
             raw_output=None,
         )
 
@@ -45,7 +45,7 @@ def parse_agent_decision_output(
         logger.warning("%s returned non-JSON content: %s", provider_name, normalized_output[:1000])
         return AgentDecision(
             mode="answer",
-            message=normalized_output,
+            response=normalized_output,
             raw_output=normalized_output,
         )
 
@@ -66,7 +66,7 @@ def parse_agent_decision_output(
 
     return AgentDecision(
         mode=mode,
-        message=parsed.get("message", normalized_output),
+        response=parsed.get("message", normalized_output),
         tool_requests=tool_requests,
         raw_output=normalized_output,
     )
