@@ -3,10 +3,12 @@ from datetime import UTC, datetime
 from fastapi import APIRouter, HTTPException
 
 from mcp_dalux.api.schemas import (
-    CreateSessionRequest,
-    CreateSessionResponse,
+    StartSessionRequest,
+    StartSessionResponse,
     SendPromptRequest,
     SendPromptResponse,
+    StartSessionRequest,
+    StartSessionResponse,
 )
 from mcp_dalux.api.services.prompt_service import (
     LLMError,
@@ -14,16 +16,16 @@ from mcp_dalux.api.services.prompt_service import (
     PromptValidationError,
     send_prompt_response,
 )
-from mcp_dalux.api.services.session_service import SessionNotFoundError, create_session_response
+from mcp_dalux.api.services.session_service import SessionNotFoundError, start_session_response
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
 
 
-@router.post("/create")
-async def create_session(session_request: CreateSessionRequest) -> CreateSessionResponse:
-    """Create a new session for a given project and category."""
+@router.post("/start")
+async def start_session(session_request: StartSessionRequest) -> StartSessionResponse:
+    """Start a new session for a given project and category."""
 
-    return create_session_response(
+    return start_session_response(
         project_name=session_request.project_name,
         category=session_request.category,
     )

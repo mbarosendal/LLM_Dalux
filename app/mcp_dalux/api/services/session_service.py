@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from mcp_dalux.api.schemas import CreateSessionResponse
+from mcp_dalux.api.schemas import StartSessionResponse, StartSessionResponse
 from mcp_dalux.session_models import (
     SessionState,
     create_session_state,
@@ -16,11 +16,11 @@ class SessionNotFoundError(ValueError):
 # In-memory store for active sessions. In production, this would be a database.
 _active_sessions: dict[str, SessionState] = {}
 
-
-def _to_create_session_response(session_state: SessionState) -> CreateSessionResponse:
+# In production with more users, session would have to authenticate and associate the user with the session. For the prototype, we hardcode a single user and that all sessions are accessible to that user.
+def _to_start_session_response(session_state: SessionState) -> StartSessionResponse:
     """Map internal SessionState to HTTP response contract."""
 
-    return CreateSessionResponse(
+    return StartSessionResponse(
         session_id=session_state.session_id,
         start_time=session_state.start_time.isoformat(),
         end_time=session_state.end_time.isoformat(),
@@ -31,12 +31,12 @@ def _to_create_session_response(session_state: SessionState) -> CreateSessionRes
 
 
 # Add async+await if we need to do any I/O here later (e.g., database calls, external service calls). For now, it's all in-memory.
-def create_session_response(project_name: str, category: str) -> CreateSessionResponse:
+def start_session_response(project_name: str, category: str) -> StartSessionResponse:
     """Create SessionState, persist it, and map to HTTP response contract."""
 
     session_state = create_session_state(project_name=project_name, category=category)
     _active_sessions[session_state.session_id] = session_state
-    return _to_create_session_response(session_state)
+    return _to_start_session_response(session_state)
 
 
 def check_session_exists(session_id: str) -> bool:

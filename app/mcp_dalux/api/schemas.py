@@ -1,29 +1,19 @@
 from __future__ import annotations
 
-from pydantic import BaseModel, Field
+from typing import Literal
 
-# Add request/response contracts here before building business logic.
-# These models "freeze contracts" so the API stays stable.
-#
-# Start with:
-# - CreateSessionRequest
-# - CreateSessionResponse
-# - SendPromptRequest
-# - SendPromptResponse
-# - ApiError
-#
-# Keeping the schemas minimal at first.
+from pydantic import BaseModel, Field
 
 class ApiError(BaseModel):
     code: str = Field(..., description="Short machine-readable error code")
     message: str = Field(..., description="Human-readable error message")
 
 
-class CreateSessionRequest(BaseModel):
+class StartSessionRequest(BaseModel):
     project_name: str = Field(..., min_length=1, description="Name of the Dalux project")
-    category: str = Field(default="tasks", description="Task category (e.g., 'tasks', 'files')")
+    category: Literal["tasks", "files"] = Field(default="tasks", description="Task category (e.g., 'tasks', 'files')")
 
-class CreateSessionResponse(BaseModel):
+class StartSessionResponse(BaseModel):
     session_id: str = Field(..., description="Unique session ID (UUID)")
     start_time: str = Field(..., description="Session start timestamp")
     end_time: str = Field(..., description="Session end timestamp")
