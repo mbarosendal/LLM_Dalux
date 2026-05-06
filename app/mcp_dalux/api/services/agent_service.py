@@ -27,7 +27,7 @@ def build_runtime_instructions_for_http(session_state: SessionState) -> str:
         project_id=session_state.project_id,
         project_name=session_state.project_name,
         subject=session_state.subject,
-        actor_user_id=Config.DALUX_USER_ID,
+        # actor_user_id=Config.DALUX_USER_ID,
         conversation_history=session_state.render_history(),
     )
 

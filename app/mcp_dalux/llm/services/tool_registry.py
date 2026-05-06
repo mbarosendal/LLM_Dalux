@@ -12,12 +12,6 @@ class ToolSpec:
 
 
 _TOOL_SPECS: dict[str, ToolSpec] = {
-    "get_current_user_context": ToolSpec(
-        name="get_current_user_context",
-        description="Resolve current user context for personal queries.",
-        usage="Call this first for 'my/me/mine' requests to anchor the actor user and then filter results by that user.",
-        arguments_hint="project_id is optional.",
-    ),
     "get_tasks": ToolSpec(
         name="get_tasks",
         description="List tasks for discovery and filtering.",
@@ -29,18 +23,6 @@ _TOOL_SPECS: dict[str, ToolSpec] = {
         description="List task change events and inferred statuses.",
         usage="Primary tool for task progress, open vs closed, and final status. Use taskSummaries as the source of truth for status answers. Use items only for timelines or detail questions. Do not re-infer status if inferredStatus or finalStatus is present.",
         arguments_hint="project_id and bookmark are optional. Returns both event-level items and taskSummaries with latest status information.",
-    ),
-    "get_users": ToolSpec(
-        name="get_users",
-        description="List users for lookup and matching.",
-        usage="Use for discovery by name/company. Use get_user only when a specific userId is already known.",
-        arguments_hint="project_id is optional.",
-    ),
-    "get_user": ToolSpec(
-        name="get_user",
-        description="Get one user by known userId.",
-        usage="Use only when userId is already known and you need a single-user lookup.",
-        arguments_hint="user_id is required, project_id is optional.",
     ),
     "get_workpackages": ToolSpec(
         name="get_workpackages",

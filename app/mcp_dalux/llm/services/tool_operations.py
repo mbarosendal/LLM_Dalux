@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections.abc import Callable
 
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
-from mcp_dalux.config import Config
 from mcp_dalux.llm.services.tool_execution import ToolExecutionContext, execute_tool
 from mcp_dalux.llm.services.tool_presenters import make_tool_response
 from mcp_dalux.llm.services.tool_transformers import (
@@ -166,39 +165,39 @@ def _run_get_user(
 
 
 @ToolPolicy(max_calls=20)
-def _run_get_current_user_context(
-    adapter: DaluxAdapter,
-    arguments: dict[str, object],
-    scope_key: str,
-) -> dict:
-    del adapter
-    tool_name = "get_current_user_context"
-    project_id = _optional_str(arguments.get("project_id"))
-    project_label = project_id or "default project"
-
-    def action() -> dict:
-        user_id = Config.DALUX_USER_ID
-        if not user_id:
-            raise ValueError("Current user context is not configured (DALUX_USER_ID).")
-        return make_tool_response(
-            tool=tool_name,
-            kind="context",
-            project=project_label,
-            summary="Resolved user context for personal queries.",
-            data={
-                "userId": user_id,
-                "projectId": project_id or Config.DALUX_SCOPED_PROJECT_ID,
-            },
-        )
-
-    return execute_tool(
-        ToolExecutionContext(
-            tool_name=tool_name,
-            project_label=project_label,
-            request_payload={"project_id": project_id},
-        ),
-        action,
-    )
+# def _run_get_current_user_context(
+#     adapter: DaluxAdapter,
+#     arguments: dict[str, object],
+#     scope_key: str,
+# ) -> dict:
+#     del adapter
+#     tool_name = "get_current_user_context"
+#     project_id = _optional_str(arguments.get("project_id"))
+#     project_label = project_id or "default project"
+#
+#     def action() -> dict:
+#         user_id = Config.DALUX_USER_ID
+#         if not user_id:
+#             raise ValueError("Current user context is not configured (DALUX_USER_ID).")
+#         return make_tool_response(
+#             tool=tool_name,
+#             kind="context",
+#             project=project_label,
+#             summary="Resolved user context for personal queries.",
+#             data={
+#                 "userId": user_id,
+#                 "projectId": project_id or Config.DALUX_SCOPED_PROJECT_ID,
+#             },
+#         )
+#
+#     return execute_tool(
+#         ToolExecutionContext(
+#             tool_name=tool_name,
+#             project_label=project_label,
+#             request_payload={"project_id": project_id},
+#         ),
+#         action,
+#     )
 
 
 @ToolPolicy(max_calls=20)
@@ -241,9 +240,9 @@ _ToolHandler = Callable[[DaluxAdapter, dict[str, object], str], dict]
 _TOOL_HANDLERS: dict[str, _ToolHandler] = {
     "get_tasks": _run_get_tasks,
     "get_task_changes": _run_get_task_changes,
-    "get_users": _run_get_users,
-    "get_user": _run_get_user,
-    "get_current_user_context": _run_get_current_user_context,
+    # "get_users": _run_get_users,
+    # "get_user": _run_get_user,
+    # "get_current_user_context": _run_get_current_user_context,
     "get_workpackages": _run_get_workpackages,
 }
 

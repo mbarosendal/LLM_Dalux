@@ -4,7 +4,8 @@ from mcp_dalux.llm.instructions.dalux_context import DALUX_CONTEXT
 from mcp_dalux.llm.instructions.files_context import FILES_CONTEXT
 from mcp_dalux.llm.instructions.system_prompt import SYSTEM_PROMPT
 from mcp_dalux.llm.instructions.tasks_context import TASKS_CONTEXT
-from mcp_dalux.llm.instructions.user_context import USER_CONTEXT_TEMPLATE
+
+# from mcp_dalux.llm.instructions.user_context import USER_CONTEXT_TEMPLATE
 from mcp_dalux.llm.services.tool_registry import render_tool_context
 
 
@@ -20,8 +21,9 @@ def build_runtime_instructions(
     """Compose runtime instructions shared by HTTP and MCP transport paths."""
     sections = [SYSTEM_PROMPT, DALUX_CONTEXT]
 
-    if actor_user_id:
-        sections.append(USER_CONTEXT_TEMPLATE.format(actor_user_id=actor_user_id))
+    # User-specific runtime instructions are disabled for the public deployment.
+    # if actor_user_id:
+    #     sections.append(USER_CONTEXT_TEMPLATE.format(actor_user_id=actor_user_id))
 
     if project_id:
         sections.append(f"SESSION PROJECT:\n- Active project id: {project_id}")
