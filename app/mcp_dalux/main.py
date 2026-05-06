@@ -34,10 +34,18 @@ def main() -> None:
 
     if Config.APP_MODE == "mcp":
         logger.info(f"Starting MCP server via {Config.MCP_TRANSPORT}.")
-        create_mcp_server().run(
-            transport=Config.MCP_TRANSPORT,
-            show_banner=False,
-        )
+        run_kwargs = {
+            "transport": Config.MCP_TRANSPORT,
+            "show_banner": False,
+        }
+        if Config.MCP_TRANSPORT != "stdio":
+            run_kwargs.update(
+                {
+                    "host": Config.MCP_HOST,
+                    "port": Config.MCP_PORT,
+                }
+            )
+        create_mcp_server().run(**run_kwargs)
         return
 
     raise ValueError(f"Unsupported APP_MODE: {Config.APP_MODE}")
