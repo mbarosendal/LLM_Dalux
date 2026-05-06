@@ -15,6 +15,7 @@ def build_runtime_instructions(
     project_name: str | None,
     subject: str | None,
     actor_user_id: str | None,
+    conversation_history: str | None = None,
 ) -> str:
     """Compose runtime instructions shared by HTTP and MCP transport paths."""
     sections = [SYSTEM_PROMPT, DALUX_CONTEXT]
@@ -36,5 +37,8 @@ def build_runtime_instructions(
 
     if subject:
         sections.append(f"SESSION SUBJECT:\n- Focus area: {subject}")
+
+    if conversation_history:
+        sections.append(conversation_history)
 
     return "\n\n".join(section.strip() for section in sections if section.strip())

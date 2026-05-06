@@ -54,15 +54,11 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
         raise PromptValidationError(f"Prompt too long (max {MAX_INPUT_LENGTH} chars)")
 
     session_state = get_session_state(prompt_input.session_id)
-    # logger.info(
-    #     "Loaded session context session_id=%s category=%s project_name=%s",
-    #     prompt_input.session_id,
-    #     session_context.category,
-    #     session_context.project_name,
-    # )
 
     runtime_instructions = build_runtime_instructions_for_http(session_state)
     scope_key = f"http-session:{prompt_input.session_id}"
+
+    session_state.add_turn("user", processed_text)
 
     try:
         response_text = await run_agent_loop(
@@ -74,6 +70,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
         logger.exception("LLM request failed for session_id=%s", prompt_input.session_id)
         raise LLMError(f"LLM request failed: {exc}") from exc
 
+    session_state.add_turn("assistant", response_text)
     end_time = update_session_end_time(prompt_input.session_id)
     model_name = get_llm_client().version
 
