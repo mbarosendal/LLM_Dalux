@@ -17,7 +17,7 @@ class Config:
     DALUX_USER_ID = os.getenv("DALUX_USER_ID")
 
     # App mode determines whether to start the web API or the MCP server.
-    APP_MODE = os.getenv("APP_MODE", "mcp").lower()
+    APP_MODE = os.getenv("APP_MODE", "web_api").lower()
     MCP_TRANSPORT = os.getenv("MCP_TRANSPORT", "stdio").lower()
 
     # HTTP server config (for web API mode).
@@ -30,15 +30,30 @@ class Config:
     # Limit of agent rounds (one full cycle of tool usage) to prevent infinite loops.
     MAX_AGENT_ROUNDS = 2
     # Agent selection
-    LLM_PROVIDER = os.getenv("LLM_PROVIDER", "gemini").lower()
+    LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
 
     # Claude runtime config.
     CLAUDE_API_KEY = os.getenv("CLAUDE_API_KEY")
     CLAUDE_MODEL = os.getenv("CLAUDE_MODEL", "claude-opus-4-6").lower()
 
-    # Gemini runtime config (to be added when Gemini client is wired up)
+    # OpenRouter runtime config.
+    OPEN_ROUTER_KEY = os.getenv("OPEN_ROUTER_KEY")
+    OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1").rstrip("/")
+    OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "").strip()
+    OPENROUTER_FALLBACK_MODELS = [m.strip() for m in os.getenv("OPENROUTER_FALLBACK_MODELS", "").split(",") if m.strip()]
+    OPENROUTER_HTTP_REFERER = os.getenv("OPENROUTER_HTTP_REFERER", "").strip()
+    OPENROUTER_APP_TITLE = os.getenv("OPENROUTER_APP_TITLE", "").strip()
+
+    # Ollama runtime config.
+    OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434").rstrip("/")
+    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "")
+    OLLAMA_FALLBACK_MODELS = [m.strip() for m in os.getenv("OLLAMA_FALLBACK_MODELS", "").split(",") if m.strip()]
+
+    # Gemini runtime config
     GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3-flash-preview").lower()
+    GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash").lower()
+    # Fallback models to try if the primary model fails (comma-separated)
+    GEMINI_FALLBACK_MODELS = [m.strip().lower() for m in os.getenv("GEMINI_FALLBACK_MODELS", "gemini-2.5-flash-lite,gemini-2.5-pro").split(",")]
 
     @classmethod
     def validate(cls) -> None:
@@ -50,8 +65,8 @@ class Config:
             raise ValueError("API_AUTH_TOKEN is required when APP_MODE is 'web_api'.")
         if not cls.TRUSTED_HOSTS:
             raise ValueError("TRUSTED_HOSTS must include at least one host.")
-        if cls.LLM_PROVIDER not in {"claude", "mock", "gemini"}:
-            raise ValueError("LLM_PROVIDER must be one of: claude, mock, gemini.")
+        if cls.LLM_PROVIDER not in {"claude", "mock", "gemini", "ollama", "openrouter"}:
+            raise ValueError("LLM_PROVIDER must be one of: claude, mock, gemini, ollama, openrouter.")
         if not cls.DALUX_BASE_URL:
             raise ValueError("DALUX_BASE_URL is not set in the environment variables.")
         if not cls.DALUX_API_KEY:
@@ -60,9 +75,11 @@ class Config:
             raise ValueError("DALUX_PROJECT_ID is not set in the environment variables.")
         if not cls.DALUX_USER_ID:
             raise ValueError("DALUX_USER_ID is not set in the environment variables.")
-        if cls.LLM_PROVIDER not in {"claude", "gemini"}:
-            raise ValueError("LLM_PROVIDER must be set to 'claude' or 'gemini'.")
+        if cls.LLM_PROVIDER not in {"claude", "gemini", "mock", "ollama", "openrouter"}:
+            raise ValueError("LLM_PROVIDER must be set to 'claude', 'gemini', 'mock', 'ollama', or 'openrouter'.")
         if cls.LLM_PROVIDER == "claude" and not cls.CLAUDE_API_KEY:
             raise ValueError("CLAUDE_API_KEY is required when LLM_PROVIDER is 'claude'.")
         if cls.LLM_PROVIDER == "gemini" and not cls.GEMINI_API_KEY:
             raise ValueError("GEMINI_API_KEY is required when LLM_PROVIDER is 'gemini'.")
+        if cls.LLM_PROVIDER == "openrouter" and not cls.OPEN_ROUTER_KEY:
+            raise ValueError("OPEN_ROUTER_KEY is required when LLM_PROVIDER is 'openrouter'.")
