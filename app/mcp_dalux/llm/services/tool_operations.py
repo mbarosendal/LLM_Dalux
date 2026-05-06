@@ -164,7 +164,7 @@ def _run_get_user(
     )
 
 
-@ToolPolicy(max_calls=20)
+# @ToolPolicy(max_calls=20)
 # def _run_get_current_user_context(
 #     adapter: DaluxAdapter,
 #     arguments: dict[str, object],
