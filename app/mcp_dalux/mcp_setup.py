@@ -1,8 +1,6 @@
 from fastmcp import FastMCP
-from starlette.middleware import Middleware
 
 from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
-from mcp_dalux.api.middleware.mcp_token_auth import MCPTokenAuthMiddleware
 from mcp_dalux.config import Config
 from mcp_dalux.llm.services.instructions_service import build_runtime_instructions
 from mcp_dalux.llm.tools.dalux_tools_tasks import register_dalux_tools_tasks
@@ -16,9 +14,6 @@ def create_mcp_server(session_state: SessionState | None = None) -> FastMCP:
     """Create and configure the FastMCP server with registered tools."""
     active_session = session_state or get_default_session_state()
 
-    # Register token auth middleware when MCP_API_TOKEN is set; Middleware wrapper is required by FastMCP.
-    middleware = [Middleware(MCPTokenAuthMiddleware)]
-
     mcp = FastMCP(
         name="dalux-mcp",
         instructions=build_runtime_instructions(
@@ -28,7 +23,6 @@ def create_mcp_server(session_state: SessionState | None = None) -> FastMCP:
             subject=active_session.subject,
             actor_user_id=Config.DALUX_USER_ID,
         ),
-        middleware=middleware,
     )
     adapter = DaluxAdapter()
 
