@@ -29,7 +29,7 @@ class SessionState:
     history: list[ConversationTurn] = field(default_factory=list)
 
     def add_turn(self, role: Literal["user", "assistant"], content: str) -> None:
-        """Append a trimmed turn to the in-memory history."""
+        """Append a turn to the in-memory chat history."""
 
         normalized_content = content.strip()
         if not normalized_content:
