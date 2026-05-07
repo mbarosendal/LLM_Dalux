@@ -1,11 +1,31 @@
 from __future__ import annotations
 
+import hashlib
 from datetime import datetime
 from zoneinfo import ZoneInfo
 
 from mcp_dalux.logging_setup import STATUS_DEBUG_LOG_NAME, append_structured_log_event
 
 LOG_ONLY_LATEST_TASK_CHANGES = True
+GDPR_ANONYMIZE_PREFIX = "user_"
+
+# GDPR anonymizer method: userId values are hashed to maintain setup and traceability while protecting PII
+
+
+def _anonymize_user_id(user_id: str | None) -> str | None:
+    """Anonymize a userId by hashing it to a short, consistent identifier.
+
+    Same userId always produces same hash (for debugging/logging).
+    """
+    if not user_id or not isinstance(user_id, str):
+        return None
+    try:
+        hash_obj = hashlib.sha256(user_id.encode())
+        short_hash = hash_obj.hexdigest()[:12]  # First 12 chars of SHA256
+        return f"{GDPR_ANONYMIZE_PREFIX}{short_hash}"
+    except Exception:
+        return None
+
 
 # Extractor methods
 
@@ -33,7 +53,7 @@ def _normalize_user_object(user: dict) -> dict:
     first_name = user.get("firstName", "No name")
     last_name = user.get("lastName", "")
     return {
-        "userId": user.get("userId", "N/A"),
+        "userId": _anonymize_user_id(user.get("userId")),  # GDPR: Anonymized
         "name": f"{first_name} {last_name}".strip(),
         "email": user.get("email", "N/A"),
         "companyId": user.get("companyId", "N/A"),
@@ -56,7 +76,7 @@ def _normalize_task_object(task: dict) -> dict:
         "typeName": type_info.get("name", "N/A"),
         "number": task.get("number", "N/A"),
         "created": _convert_to_danish_time(task.get("created", "N/A")),
-        "createdByUserId": created_by.get("userId", "N/A"),
+        "createdByUserId": _anonymize_user_id(created_by.get("userId")),  # GDPR: Anonymized
         "workflowName": workflow.get("name", "N/A"),
         "coordinates": {
             "X": coordinateXYZ.get("x", "N/A"),
@@ -244,10 +264,10 @@ def transform_task_changes_collection_payload(payload: object, project_label: st
             "status": status,
             "inferredStatus": inferred,
             "description": description,
-            "modifiedByUserId": (fields.get("modifiedBy") or {}).get("userId"),
+            "modifiedByUserId": _anonymize_user_id((fields.get("modifiedBy") or {}).get("userId")),  # GDPR: Anonymized
             "assignedToRoleId": (fields.get("assignedTo") or {}).get("roleId"),
             "assignedToRoleName": (fields.get("assignedTo") or {}).get("roleName"),
-            "currentResponsibleUserId": (fields.get("currentResponsible") or {}).get("userId"),
+            "currentResponsibleUserId": _anonymize_user_id((fields.get("currentResponsible") or {}).get("userId")),  # GDPR: Anonymized
             "coordinates": {
                 "X": coordinateXYZ.get("x", "N/A"),
                 "Y": coordinateXYZ.get("y", "N/A"),
@@ -267,7 +287,7 @@ def transform_task_changes_collection_payload(payload: object, project_label: st
             "latestTimestamp": latest.get("timestamp"),
             "assignedToRoleId": latest.get("assignedToRoleId"),
             "assignedToRoleName": latest.get("assignedToRoleName"),
-            "currentResponsibleUserId": latest.get("currentResponsibleUserId"),
+            "currentResponsibleUserId": latest.get("currentResponsibleUserId"),  # GDPR: Already anonymized from item
         }
         for task_id, latest in task_latest.items()
     ]

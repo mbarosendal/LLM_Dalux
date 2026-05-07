@@ -2,7 +2,8 @@
 
 USER_CONTEXT_TEMPLATE = """
 Adgang til personlige detaljer på medarbejdere er fjernet på grund af GDPR-hensyn. 
-Informer venligst brugeren om dette."""
+Alle brugerId'er i data er også anonymiseret via hash for at beskytte personlige oplysninger.
+Informer venligst brugeren om dette, hvis de spørger ind til brugerinformationer."""
 
 # BRUGER-KONTEKST:
 # - Den aktuelle bruger ("mig", "mine", "mit" osv.) svarer til DALUX userId: {actor_user_id}
