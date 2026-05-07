@@ -22,6 +22,9 @@ class Config:
     MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
     MCP_PORT = int(os.getenv("MCP_PORT", os.getenv("PORT", "8000")))
     MCP_API_TOKEN = os.getenv("MCP_API_TOKEN")
+    MCP_HTTP_PATH = os.getenv("MCP_HTTP_PATH", "/mcp")
+    # Supported modes: none, bearer, url-token
+    MCP_AUTH_MODE = os.getenv("MCP_AUTH_MODE", "url-token").lower()
 
     # HTTP server config (for web API mode).
     HOST = os.getenv("HOST", "127.0.0.1")
@@ -64,6 +67,10 @@ class Config:
             raise ValueError("APP_MODE must be either 'web_api' or 'mcp'.")
         if cls.APP_MODE == "mcp" and cls.MCP_TRANSPORT not in {"stdio", "http", "sse", "streamable-http"}:
             raise ValueError("MCP_TRANSPORT must be either 'stdio', 'http', 'sse', or 'streamable-http'.")
+        if cls.APP_MODE == "mcp" and cls.MCP_AUTH_MODE not in {"none", "bearer", "url-token"}:
+            raise ValueError("MCP_AUTH_MODE must be one of: 'none', 'bearer', 'url-token'.")
+        if cls.APP_MODE == "mcp" and not cls.MCP_HTTP_PATH.startswith("/"):
+            raise ValueError("MCP_HTTP_PATH must start with '/'.")
         if cls.APP_MODE == "mcp" and not (1 <= cls.MCP_PORT <= 65535):
             raise ValueError("MCP_PORT must be a valid TCP port between 1 and 65535.")
         if cls.APP_MODE == "web_api" and not cls.API_AUTH_TOKEN:
