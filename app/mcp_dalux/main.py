@@ -6,7 +6,7 @@ import uvicorn
 from mcp_dalux.api.app import create_http_app
 from mcp_dalux.config import Config
 from mcp_dalux.logging_setup import configure_logging
-from mcp_dalux.mcp_setup import create_mcp_server
+from mcp_dalux.mcp_app import create_mcp_asgi_app
 
 logger = logging.getLogger(__name__)
 
@@ -33,19 +33,16 @@ def main() -> None:
         return
 
     if Config.APP_MODE == "mcp":
-        logger.info(f"Starting MCP server via {Config.MCP_TRANSPORT}.")
-        run_kwargs = {
-            "transport": Config.MCP_TRANSPORT,
-            "show_banner": False,
-        }
-        if Config.MCP_TRANSPORT != "stdio":
-            run_kwargs.update(
-                {
-                    "host": Config.MCP_HOST,
-                    "port": Config.MCP_PORT,
-                }
-            )
-        create_mcp_server().run(**run_kwargs)
+        logger.info(f"Starting MCP server (ASGI wrapper) via {Config.MCP_TRANSPORT}.")
+        # Run a FastAPI ASGI app that applies Starlette middleware (auth/logging)
+        # and proxies /mcp to an internal FastMCP instance.
+        app = create_mcp_asgi_app()
+        uvicorn.run(
+            app,
+            host=Config.MCP_HOST,
+            port=Config.MCP_PORT,
+            reload=False,
+        )
         return
 
     raise ValueError(f"Unsupported APP_MODE: {Config.APP_MODE}")
