@@ -1,7 +1,6 @@
 from starlette.middleware import Middleware
 from starlette.responses import PlainTextResponse
 
-from mcp_dalux.api.middleware.mcp_token_auth import MCPTokenAuthMiddleware
 from mcp_dalux.api.middleware.request_logging import RequestLoggingMiddleware
 from mcp_dalux.config import Config
 from mcp_dalux.mcp_setup import create_mcp_server
@@ -19,7 +18,7 @@ def create_mcp_asgi_app():
         transport=Config.MCP_TRANSPORT,
         middleware=[
             Middleware(RequestLoggingMiddleware),
-            Middleware(MCPTokenAuthMiddleware),
+            # Middleware(MCPTokenAuthMiddleware),
         ],
     )
 
