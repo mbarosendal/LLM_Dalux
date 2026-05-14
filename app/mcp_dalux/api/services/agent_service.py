@@ -10,7 +10,7 @@ from mcp_dalux.llm.client_factory import get_llm_client
 from mcp_dalux.llm.contracts import AgentDecision
 from mcp_dalux.llm.services.instructions_service import build_runtime_instructions
 from mcp_dalux.llm.services.tool_operations import execute_tool_operation
-from mcp_dalux.llm.services.tool_registry import get_tool_names, has_tool
+from mcp_dalux.llm.services.tool_registry import get_tool_names
 from mcp_dalux.session_models import SessionState
 
 logger = logging.getLogger(__name__)
@@ -32,29 +32,16 @@ def build_runtime_instructions_for_http(session_state: SessionState) -> str:
     )
 
 
-def execute_tool_request(
-    adapter: DaluxAdapter,
-    tool_name: str,
-    arguments: dict[str, object],
-    scope_key: str,
-) -> dict:
-    """Execute one tool call through the shared tool operation registry."""
-    if not has_tool(tool_name):
-        raise ValueError(f"Unsupported tool requested by model: {tool_name}")
-
-    return execute_tool_operation(adapter, tool_name, arguments, scope_key)
-
-
 async def _dispatch_tool_requests(
     decision: AgentDecision,
     scope_key: str,
 ) -> list[dict[str, object]]:
-    """Dispatch requested tools against the real Dalux-backed runtime."""
+    """Dispatch requested tools."""
     tool_results: list[dict[str, object]] = []
 
     for tool_request in decision.tool_requests:
         result = await asyncio.to_thread(
-            execute_tool_request,
+            execute_tool_operation,
             _adapter,
             tool_request.tool_name,
             tool_request.arguments,

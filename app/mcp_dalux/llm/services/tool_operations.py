@@ -254,9 +254,9 @@ def execute_tool_operation(
     scope_key: str,
 ) -> dict:
     """Execute one named tool operation and return the standardized response envelope."""
-    handler = _TOOL_HANDLERS.get(tool_name)
-    if not handler:
-        raise ValueError(f"Unsupported tool requested by model: {tool_name}")
+    if tool_name not in _TOOL_HANDLERS:
+        raise ValueError(f"Unsupported tool requested by agent: {tool_name}")
+    handler = _TOOL_HANDLERS[tool_name]
 
     return handler(
         adapter=adapter,
