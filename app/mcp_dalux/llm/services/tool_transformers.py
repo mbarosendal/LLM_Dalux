@@ -7,22 +7,22 @@ from zoneinfo import ZoneInfo
 from mcp_dalux.logging_setup import STATUS_DEBUG_LOG_NAME, append_structured_log_event
 
 LOG_ONLY_LATEST_TASK_CHANGES = True
-GDPR_ANONYMIZE_PREFIX = "user_"
+HASH_PREFIX = "user_"
 
 # GDPR anonymizer method: userId values are hashed to maintain setup and traceability while protecting PII
 
 
 def _anonymize_user_id(user_id: str | None) -> str | None:
-    """Anonymize a userId by hashing it to a short, consistent identifier.
+    """Pseudo-anonymize a userId by hashing it to a short, consistent identifier.
 
-    Same userId always produces same hash (for debugging/logging).
+    Same userId always produces same hash.
     """
     if not user_id or not isinstance(user_id, str):
         return None
     try:
         hash_obj = hashlib.sha256(user_id.encode())
         short_hash = hash_obj.hexdigest()[:12]  # First 12 chars of SHA256
-        return f"{GDPR_ANONYMIZE_PREFIX}{short_hash}"
+        return f"{HASH_PREFIX}{short_hash}"
     except Exception:
         return None
 
@@ -127,8 +127,6 @@ def _infer_task_change_status(
         return 'Godkendt, med opfølgning")'
     if action_value == "approve" and status_value == "closed":
         return "Godkendt"
-    # if action_value == "assign" and has_description:
-    #     return "new"
     if action_value == "assign" and status_value == "open":
         return "Nye og igangværende"  # Combined status for now.
     if action_value == "update" and has_description:
@@ -137,8 +135,6 @@ def _infer_task_change_status(
         return "Afvist"
     if action_value == "complete" and status_value == "open":
         return "Klarmeldt"
-    # if action_value == "other" and status_value == "closed":
-    #     return "archived"
     if action_value == "other" and status_value == "closed":
         return "Arkiveret og udgået"  # Combined status for now.
     if status_value in {"closed", "open"}:
