@@ -19,6 +19,7 @@ class Config:
     # App mode determines whether to start the web API or the MCP server.
     APP_MODE = os.getenv("APP_MODE", "mcp").lower()
     MCP_TRANSPORT = os.getenv("MCP_TRANSPORT", "streamable-http").lower()
+    # Only relevant for MCP mode with HTTP transport (not stdio)
     MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
     MCP_PORT = int(os.getenv("MCP_PORT", os.getenv("PORT", "8000")))
     MCP_API_TOKEN = os.getenv("MCP_API_TOKEN")
