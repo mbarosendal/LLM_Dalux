@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import sys
 
@@ -7,6 +8,7 @@ from mcp_dalux.api.app import create_http_app
 from mcp_dalux.config import Config
 from mcp_dalux.logging_setup import configure_logging
 from mcp_dalux.mcp_app import create_mcp_asgi_app
+from mcp_dalux.mcp_setup import create_mcp_server
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +34,15 @@ def main() -> None:
         )
         return
 
+    if Config.APP_MODE == "mcp" and Config.MCP_TRANSPORT == "stdio":
+        logger.info("Starting MCP server via stdio.")
+        mcp_server = create_mcp_server()
+        asyncio.run(mcp_server.run_stdio_async())
+        return
+
     if Config.APP_MODE == "mcp":
         logger.info(f"Starting MCP server (ASGI wrapper) via {Config.MCP_TRANSPORT}.")
-        # Run a FastAPI ASGI app that applies Starlette middleware (auth/logging)
-        # and proxies /mcp to an internal FastMCP instance.
+        # Run a FastAPI ASGI app that applies middleware (auth/logging)
         app = create_mcp_asgi_app()
         uvicorn.run(
             app,
