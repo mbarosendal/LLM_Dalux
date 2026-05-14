@@ -24,3 +24,4 @@ test-api.ps1
 test-api - 05-05-2026✔️ .ps1
 tests/handshake_test.py
 tests/handshake_with_auth.py
+test-api - Copy.ps1
