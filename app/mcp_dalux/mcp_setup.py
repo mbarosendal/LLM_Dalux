@@ -12,7 +12,10 @@ from mcp_dalux.session_models import SessionState, get_default_session_state
 
 def create_mcp_server(session_state: SessionState | None = None) -> FastMCP:
     """Create and configure the FastMCP server with registered tools."""
-    active_session = session_state or get_default_session_state()
+    active_session = session_state or get_default_session_state(
+        user_id=Config.DALUX_USER_ID,
+        project_id=Config.DALUX_SCOPED_PROJECT_ID,
+    )
 
     mcp = FastMCP(
         name="dalux-mcp",
@@ -20,8 +23,7 @@ def create_mcp_server(session_state: SessionState | None = None) -> FastMCP:
             category=active_session.category,
             project_id=active_session.project_id,
             project_name=active_session.project_name,
-            subject=active_session.subject,
-            actor_user_id=Config.DALUX_USER_ID,
+            actor_user_id=active_session.user_id,
         ),
     )
     adapter = DaluxAdapter()

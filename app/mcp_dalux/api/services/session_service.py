@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 
-from mcp_dalux.api.schemas import StartSessionResponse, StartSessionResponse
+from mcp_dalux.api.schemas import StartSessionResponse
+from mcp_dalux.config import Config
 from mcp_dalux.session_models import (
     SessionState,
     create_session_state,
@@ -16,7 +17,9 @@ class SessionNotFoundError(ValueError):
 # In-memory store for active sessions. In production, this would be a database.
 _active_sessions: dict[str, SessionState] = {}
 
-# In production with more users, session would have to authenticate and associate the user with the session. For the prototype, we hardcode a single user and that all sessions are accessible to that user.
+
+# In production with more users, sessions would authenticate and associate a user
+# with the session. For the prototype, we keep a single env-backed user identity.
 def _to_start_session_response(session_state: SessionState) -> StartSessionResponse:
     """Map internal SessionState to HTTP response contract."""
 
@@ -24,17 +27,19 @@ def _to_start_session_response(session_state: SessionState) -> StartSessionRespo
         session_id=session_state.session_id,
         start_time=session_state.start_time.isoformat(),
         end_time=session_state.end_time.isoformat(),
-        project_name=session_state.project_name,
+        project_id=session_state.project_id,
         category=session_state.category,
-        subject=session_state.subject or "",
     )
 
 
 # Add async+await if we need to do any I/O here later (e.g., database calls, external service calls). For now, it's all in-memory.
-def start_session_response(project_name: str, category: str) -> StartSessionResponse:
+def create_session_response(project_id: str | None, category: str) -> StartSessionResponse:
     """Create SessionState, persist it, and map to HTTP response contract."""
 
-    session_state = create_session_state(project_name=project_name, category=category)
+    effective_project_id = project_id or Config.DALUX_SCOPED_PROJECT_ID
+    session_state = create_session_state(
+        project_id=effective_project_id, project_name="test_project", category=category, user_id=Config.DALUX_USER_ID
+    )
     _active_sessions[session_state.session_id] = session_state
     return _to_start_session_response(session_state)
 

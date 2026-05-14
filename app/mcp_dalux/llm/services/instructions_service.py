@@ -14,7 +14,6 @@ def build_runtime_instructions(
     category: str,
     project_id: str | None,
     project_name: str | None,
-    subject: str | None,
     actor_user_id: str | None,
     conversation_history: str | None = None,
 ) -> str:
@@ -36,9 +35,6 @@ def build_runtime_instructions(
 
     if category == "files":
         sections.append(FILES_CONTEXT)
-
-    if subject:
-        sections.append(f"SESSION SUBJECT:\n- Focus area: {subject}")
 
     if conversation_history:
         sections.append(conversation_history)
