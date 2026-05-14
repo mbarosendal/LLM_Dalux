@@ -5,7 +5,7 @@ from dataclasses import dataclass
 
 @dataclass(frozen=True, slots=True)
 class ToolSpec:
-    name: str
+    tool_name: str
     description: str
     usage: str
     arguments_hint: str
@@ -19,13 +19,13 @@ _TOOL_SPECS: dict[str, ToolSpec] = {
     #     arguments_hint="project_id is optional.",
     # ),
     "get_tasks": ToolSpec(
-        name="get_tasks",
+        tool_name="get_tasks",
         description="List tasks for discovery and filtering.",
         usage="Use for task overviews, counts, searches, and picking candidate tasks by subject/type/number. For current or final status, prefer get_task_changes. Use it as the discovery step before any status question.",
         arguments_hint="project_id and bookmark are optional. Returns lightweight fields such as taskId, subject, typeName, number, created, and createdByUserId.",
     ),
     "get_task_changes": ToolSpec(
-        name="get_task_changes",
+        tool_name="get_task_changes",
         description="List task change events and inferred statuses.",
         usage="Primary tool for task progress, open vs closed, and final status. Use taskSummaries as the source of truth for status answers. Use items only for timelines or detail questions. Do not re-infer status if inferredStatus or finalStatus is present.",
         arguments_hint="project_id and bookmark are optional. Returns both event-level items and taskSummaries with latest status information.",
@@ -43,7 +43,7 @@ _TOOL_SPECS: dict[str, ToolSpec] = {
     #     arguments_hint="user_id is required, project_id is optional.",
     # ),
     "get_workpackages": ToolSpec(
-        name="get_workpackages",
+        tool_name="get_workpackages",
         description="List workpackages for discovery and matching.",
         usage="Use for workpackage lookup and identifier matching when the user asks about workpackages or related filters.",
         arguments_hint="project_id is optional.",
@@ -80,7 +80,7 @@ def render_tool_context(tool_names: list[str] | None = None) -> str:
 
     lines = ["AVAILABLE TOOLS:"]
     for spec in selected_specs:
-        lines.append(f"- {spec.name}: {spec.description}")
+        lines.append(f"- {spec.tool_name}: {spec.description}")
         lines.append(f"  Usage: {spec.usage}")
         lines.append(f"  Args: {spec.arguments_hint}")
     if any(name in {"get_tasks", "get_task_changes"} for name in names):
