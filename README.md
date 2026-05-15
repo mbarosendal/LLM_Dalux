@@ -45,15 +45,15 @@ uv sync --frozen
 - Not yet enterprise-ready: no user administration, database, heavy auth or advanced operational features
 
 ## Suggestions and Challenges
-Suggested improvements:
+#### Suggested improvements:
 - Expand to other data on the Dalux API (e.g. Files) or entirely new data sources
 - Adjust the instructions for the LLM as needed in /instructions or in the tool definitions in tool_registry.py
-For production:
+#### For production:
 - Implement user administration, auth and role-based access control
 - Add persistent storage for sessions and messages in the HTTP-track
 - Strengthen prompt pre-processing and sanitization in InputPolicy
 - Focus the integration on either access track and a specific LLM
-Key challenges:
+#### Key challenges:
 - Handling large amounts of relatively unorganized data on the Dalux API
 - Polishing the LLM's memory of messages in the HTTP-track. (where SDKs don't natively support memory)
 - Ensuring robust testing, error handling and insights across long tool chains
