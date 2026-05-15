@@ -23,6 +23,7 @@ def main() -> None:
         print(f"Configuration error: {e}", file=sys.stderr)
         sys.exit(1)
 
+    # Command to run server: uv run uvicorn mcp_dalux.api.app:app --reload
     if Config.APP_MODE == "web_api":
         logger.info("Starting Dalux web API.")
         app = create_http_app()
