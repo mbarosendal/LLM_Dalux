@@ -31,7 +31,7 @@ The project provides UML-inspired diagrams for an overview of the system and key
 2) Populate the .env with required credentials and Id's for the Dalux (and LLM API if using the HTTP-track)
 3) Install dependencies from pyproject.toml (from the project root):
 ```
-pip install -e .
+uv sync --frozen
 ```
 4) Start the application using your preferred entry point (MCP or HTTP API) by adjusting the config:
 - If using MCP, choose a transport protocol (stdio or streamable-http) and a compatible MCP-client
