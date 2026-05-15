@@ -12,6 +12,7 @@ from mcp_dalux.api.services.session_service import get_session_state, update_ses
 from mcp_dalux.llm.client_factory import get_llm_client
 from mcp_dalux.llm.contracts import LLMError
 from mcp_dalux.policies.input_policy import MAX_INPUT_LENGTH, InputPolicy
+from mcp_dalux.session_models import add_session_turn
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
     runtime_instructions = build_runtime_instructions_for_http(session_state)
     scope_key = f"http-session:{prompt_input.session_id}"
 
-    session_state.add_turn("user", processed_text)
+    add_session_turn(session_state, "user", processed_text)
 
     try:
         response_text = await run_agent_loop(
@@ -70,7 +71,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
         logger.exception("LLM request failed for session_id=%s", prompt_input.session_id)
         raise LLMError(f"LLM request failed: {exc}") from exc
 
-    session_state.add_turn("assistant", response_text)
+    add_session_turn(session_state, "agent", response_text)
     end_time = update_session_end_time(prompt_input.session_id)
     model_name = get_llm_client().version
 

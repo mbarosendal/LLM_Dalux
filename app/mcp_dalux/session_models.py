@@ -10,7 +10,7 @@ from uuid import uuid4
 class ConversationTurn:
     """One message in the short-lived conversation history."""
 
-    role: Literal["user", "assistant"]
+    role: Literal["user", "agent"]
     content: str
     timestamp: datetime
 
@@ -28,32 +28,34 @@ class SessionState:
     project_name: str | None = None  # Optional, only used for richer instructions in HTTP mode. MCP mode only consumes project_id.
     history: list[ConversationTurn] = field(default_factory=list)
 
-    def add_turn(self, role: Literal["user", "assistant"], content: str) -> None:
-        """Append a turn to the in-memory chat history."""
 
-        normalized_content = content.strip()
-        if not normalized_content:
-            return
+def add_session_turn(session_state: SessionState, role: Literal["user", "agent"], content: str) -> None:
+    """Append a turn to the in-memory chat history."""
 
-        self.history.append(
-            ConversationTurn(
-                role=role,
-                content=normalized_content,
-                timestamp=datetime.now(UTC),
-            )
+    normalized_content = content.strip()
+    if not normalized_content:
+        return
+
+    session_state.history.append(
+        ConversationTurn(
+            role=role,
+            content=normalized_content,
+            timestamp=datetime.now(UTC),
         )
+    )
 
-    def render_history(self, max_turns: int = 8) -> str:
-        """Render the most recent turns as a compact instruction block."""
 
-        if max_turns <= 0 or not self.history:
-            return ""
+def render_session_history(session_state: SessionState, max_turns: int = 10) -> str:
+    """Render the most recent turns as a compact instruction block."""
 
-        recent_turns = self.history[-max_turns:]
-        lines = ["KONVERSATIONSHISTORIK:"]
-        for turn in recent_turns:
-            lines.append(f"- {turn.role}: {turn.content}")
-        return "\n".join(lines)
+    if max_turns <= 0 or not session_state.history:
+        return ""
+
+    recent_turns = session_state.history[-max_turns:]
+    lines = ["KONVERSATIONSHISTORIK:"]
+    for turn in recent_turns:
+        lines.append(f"- {turn.role}: {turn.content}")
+    return "\n".join(lines)
 
 
 # Use DDD or move to session_service.py if we want to keep all session logic in one place. For now, this is just the data model and factory function.
