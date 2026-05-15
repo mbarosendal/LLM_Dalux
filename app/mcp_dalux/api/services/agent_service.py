@@ -11,7 +11,7 @@ from mcp_dalux.llm.contracts import AgentDecision
 from mcp_dalux.llm.services.instructions_service import build_runtime_instructions
 from mcp_dalux.llm.services.tool_operations import execute_tool_operation
 from mcp_dalux.llm.services.tool_registry import get_tool_names
-from mcp_dalux.session_models import SessionState
+from mcp_dalux.session_models import SessionState, render_session_history
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +28,14 @@ def build_runtime_instructions_for_http(session_state: SessionState) -> str:
         project_name=session_state.project_name,
         subject=session_state.subject,
         # actor_user_id=Config.DALUX_USER_ID,
-        conversation_history=session_state.render_history(),
+        conversation_history=render_session_history(session_state),
     )
+
+    # Could consider dynamic registration of relevant tools for HTTP like in MCP:
+    # register_dalux_tools_users(mcp, adapter)
+    # if active_session.category == "tasks":
+    #     register_dalux_tools_tasks(mcp, adapter)
+    #     register_dalux_tools_workpackages(mcp, adapter)
 
 
 async def _dispatch_tool_requests(
@@ -78,7 +84,7 @@ async def run_agent_loop(
             logger.info("Agent loop completed with final answer")
             return decision.response
 
-        # JSON is either the presentation of data from tool_presenters.py or an error from make_error_response.
+        # JSON.dumps is either the presentation of data from make_tool_response or an error from make_error_response.
         if decision.mode == "tools" and decision.tool_requests:
             tool_results = await _dispatch_tool_requests(decision, scope_key)
             current_text = "Tool results (JSON):\n" + json.dumps(tool_results, indent=2) + "\nPlease provide the final answer."
