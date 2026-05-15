@@ -28,11 +28,6 @@ The project provides UML-inspired diagrams for an overview of the system and key
 ## How to Use
 ### Configuration overview
 Configuration is centralized in the app config and environment variables. At a high level you need to:
-- create an .env file with Dalux credentials and service settings
-- adjust configuration defaults in code when needed
-- start either the MCP server or the HTTP API
-
-### Basic setup
 1) Create an .env file with Dalux credentials and service settings
 2) Populate required credentials for the Dalux and LLM API (if using the HTTP-track)
 3) Start the application using your preferred entry point (MCP or HTTP API) by adjusting config
