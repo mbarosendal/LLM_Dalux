@@ -1,4 +1,4 @@
-# MCP for Dalux
+# LLM-integration for Dalux
 
 ## Introduction
 This project is a graduation project developed as a prototype. It provides an integration layer between Dalux (via its REST API) and an LLM (via MCP through FastMCP), with an optional parallel MCP-inspired track for direct integration to an LLM via API. It is neither coupled to a specific frontend experience nor a specific LLM, but some specific integrations are included for testing and inspiration.
