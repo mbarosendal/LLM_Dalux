@@ -35,7 +35,7 @@ class Config:
     CORS_ALLOW_ORIGINS = [origin.strip() for origin in os.getenv("CORS_ALLOW_ORIGINS", "").split(",") if origin.strip()]
 
     # Limit of agent rounds (one full cycle of tool usage) to prevent infinite loops.
-    MAX_AGENT_ROUNDS = 2
+    MAX_AGENT_ROUNDS = 3
     # Agent selection: "claude", "gemini", "ollama", "openrouter"
     LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama").lower()
 
