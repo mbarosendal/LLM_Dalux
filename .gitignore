@@ -11,9 +11,17 @@ __pycache__
 .pytest_cache/
 *.egg-info/
 
-# Exclude all json files except settings.json
+# Exclude all json files
 *.json
-!settings.json
 
-/json_dumps/
+/.vscode/
+/logs/
 app/mcp_dalux/language_model/instructions/__init__.py
+
+
+# Exclude isolated test script
+test-api.ps1
+test-api - 05-05-2026✔️ .ps1
+tests/handshake_test.py
+tests/handshake_with_auth.py
+test-api - Copy.ps1

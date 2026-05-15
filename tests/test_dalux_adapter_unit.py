@@ -1,11 +1,11 @@
 # import httpx
-import pytest
+# import pytest
 # import respx
 
 # from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 # from mcp_dalux.config import Config
 
-# # 1) Config values are "monkeypatched" (temporarily overrides Python objects/attributes) so the adapter always uses predictable test settings
+# # 1) Config values are "monkeypatched" (temporarily overrides attributes) so the adapter always uses predictable test settings
 # @pytest.fixture
 # def adapter(monkeypatch: pytest.MonkeyPatch):
 #     monkeypatch.setattr(Config, "DALUX_SCOPED_PROJECT_ID", "project-123")
