@@ -39,7 +39,7 @@ uv sync --frozen
 
 ## Current State
 - MCP integration and a standalone HTTP API are both functional.
-- Supports logging of LLM-actions, API-requests and other debugging (in logs)
+- Supports logging of LLM-actions, API-requests and other debugging (in /logs)
 - Light smoke testing for external dependencies. (in /tests)
 - Focused on core data access and tool execution to enable experimentation and insights.
 - Not yet enterprise-ready: no user administration, database, heavy auth or advanced operational features
