@@ -27,24 +27,23 @@ The project provides UML-inspired diagrams for an overview of the system and key
 
 ## How to Use
 ### Configuration overview
-Configuration is centralized in the app config and environment variables. At a high level you need to:
-1) Create an .env file with Dalux credentials and service settings
-2) Populate required credentials for the Dalux and LLM API (if using the HTTP-track)
-3) Start the application using your preferred entry point (MCP or HTTP API) by adjusting config
-4) If using MCP, choose a transport protocol (stdio or streamable-http) and a compatible MCP-client
-5) If using HTTP, choose a supported LLM (any implementation of BaseClient) and send your API REST requests to the system's endpoints (routes_sessions.py). Make sure you have a valid API key for the model's API set in the .env
+1) Create an .env file in the project root folder
+2) Populate the .env with required credentials and Id's for the Dalux (and LLM API if using the HTTP-track)
+3) Start the application using your preferred entry point (MCP or HTTP API) by adjusting the config:
+- If using MCP, choose a transport protocol (stdio or streamable-http) and a compatible MCP-client
+- If using HTTP, choose a supported LLM (any implementation of BaseClient) and send your API REST requests to the system's endpoints (routes_sessions.py). Make sure you have a valid API key for the model's API set in the .env
 
 ## Current State
 - MCP integration and a standalone HTTP API are both functional.
-- Supports logging of LLM-actions, API-requests and other debugging (/logs)
-- Only uses light smoke testing for external dependencies. (/tests)
+- Supports logging of LLM-actions, API-requests and other debugging (in logs)
+- Light smoke testing for external dependencies. (in /tests)
 - Focused on core data access and tool execution to enable experimentation and insights.
-- Not yet enterprise-ready: no user administration, database, heavy security or advanced operational features
+- Not yet enterprise-ready: no user administration, database, heavy auth or advanced operational features
 
 ## Suggestions and Challenges
 Suggested improvements:
 - Expand to other data on the Dalux API (e.g. Files) or entirely new data sources
-- Adjust the instructions for the AI as needed in /instructions or the tool definitions in tool_registry.py
+- Adjust the instructions for the LLM as needed in /instructions or in the tool definitions in tool_registry.py
 For production:
 - Implement user administration, auth and role-based access control
 - Add persistent storage for sessions and messages in the HTTP-track
