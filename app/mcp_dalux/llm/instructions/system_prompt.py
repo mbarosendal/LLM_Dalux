@@ -1,8 +1,7 @@
 """This is the base system prompt for the Dalux assistant (LLM).
 
 Keep this prompt focused on stable, general behavior.
-Domain- or category-specific guidance should be appended at runtime in orchestration.py
-(e.g. tasks_context.py, user_context.py etc).
+Domain- or category-specific guidance should be appended at runtime (e.g. tasks_context.py, user_context.py etc).
 """
 
 SYSTEM_PROMPT = """
