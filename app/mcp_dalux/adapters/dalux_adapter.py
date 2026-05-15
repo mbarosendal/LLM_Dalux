@@ -1,6 +1,3 @@
-import asyncio
-
-from fastapi import logger
 import httpx
 
 from mcp_dalux.config import Config
@@ -47,6 +44,7 @@ class DaluxAdapter:
         project_id = self._enforce_project_constraints(project_id)
         return self._execute_get(f"/3.3/projects/{project_id}/tasks/{task_id}")["data"]
 
+    # Potentially add the type-parameter to this endpoint call in the future?
     def get_task_changes(self, project_id: str | None = None, bookmark: str | None = None) -> dict:
         """GET /2.2/projects/{projectId}/tasks/changes with optional bookmark pagination."""
         project_id = self._enforce_project_constraints(project_id)
