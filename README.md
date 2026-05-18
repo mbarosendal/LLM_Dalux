@@ -29,7 +29,13 @@ The project provides UML-inspired diagrams for an overview of the system and key
 ### Configuration overview
 1) Create an .env file in the project root folder
 2) Populate the .env with required credentials and Id's for the Dalux (and LLM API if using the HTTP-track)
-3) Install dependencies from pyproject.toml (from the project root):
+```
+DALUX_API_KEY=<api-key>
+DALUX_BASE_URL=<base-url>
+DALUX_PROJECT_ID=<project-id> for scoped testing
+DALUX_USER_ID=<user-id> for current user context in data
+```
+4) Install dependencies from pyproject.toml (from the project root):
 ```
 uv sync --frozen
 ```
