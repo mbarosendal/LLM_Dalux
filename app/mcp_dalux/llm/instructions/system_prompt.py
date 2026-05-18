@@ -27,5 +27,3 @@ Sprog-adfærd:
 - Hvis brugeren skriver på et andet sprog, svar i samme sprog som brugeren.
 
 """
-
-# - If translating content (e.g. language, units or time), state and explain it clearly in your response.
