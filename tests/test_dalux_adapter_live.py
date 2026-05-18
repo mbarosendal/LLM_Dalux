@@ -3,6 +3,8 @@ from mcp_dalux.adapters.dalux_adapter import DaluxAdapter
 
 pytestmark = pytest.mark.integration
 
+# Command to run tests: uv run pytest -vv -s -rA
+
 
 def test_live_get_tasks_smoke():
     adapter = DaluxAdapter()
