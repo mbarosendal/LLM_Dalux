@@ -7,6 +7,7 @@ load_dotenv(Path(__file__).resolve().parents[2] / ".env")
 
 
 class Config:
+    # For safety, we can start in a mode that only allows access to a specific test project in Dalux.
     IS_TEST_PROJECT_ONLY = True
     DALUX_SCOPED_PROJECT_ID = os.getenv("DALUX_PROJECT_ID")
 
@@ -16,10 +17,11 @@ class Config:
     # Optional user context for personal queries.
     DALUX_USER_ID = os.getenv("DALUX_USER_ID")
 
-    # App mode determines whether to start the web API or the MCP server.
+    # App mode determines whether to start app as a web API or a MCP server.
     APP_MODE = os.getenv("APP_MODE", "mcp").lower()
-    MCP_TRANSPORT = os.getenv("MCP_TRANSPORT", "streamable-http").lower()
-    # Only relevant for MCP mode with HTTP transport (not stdio)
+    MCP_TRANSPORT = os.getenv("MCP_TRANSPORT", "stdio").lower()
+    
+    # Only relevant if MCP_TRANSPORT is set to a HTTP transport (not stdio)
     MCP_HOST = os.getenv("MCP_HOST", "0.0.0.0")
     MCP_PORT = int(os.getenv("MCP_PORT", os.getenv("PORT", "8000")))
     MCP_API_TOKEN = os.getenv("MCP_API_TOKEN")
@@ -27,7 +29,7 @@ class Config:
     # Supported modes: none, bearer, url-token
     MCP_AUTH_MODE = os.getenv("MCP_AUTH_MODE", "url-token").lower()
 
-    # HTTP server config (for web API mode).
+    # Everything below is only relevant for a HTTP server config (not MCP).
     HOST = os.getenv("HOST", "127.0.0.1")
     PORT = int(os.getenv("PORT", "8001"))
     API_AUTH_TOKEN = os.getenv("API_AUTH_TOKEN")
