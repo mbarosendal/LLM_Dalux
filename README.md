@@ -39,9 +39,9 @@ DALUX_USER_ID=<user-id> for current user context in data
 ```
 uv sync --frozen
 ```
-4) Start the application using your preferred entry point (MCP or HTTP API) by adjusting the config:
-- If using MCP, choose a transport protocol (stdio or streamable-http) and a compatible MCP-client
-- If using HTTP, choose a supported LLM (any implementation of BaseClient) and send your API REST requests to the system's endpoints (routes_sessions.py). Make sure you have a valid API key for the model's API set in the .env
+4) Start the application using your preferred entry point (MCP or HTTP API) by adjusting the config's APP_MODE:
+- If using MCP, choose a MCP_TRANSPORT (stdio or streamable-http) and a compatible MCP-client (e.g. Claude Desktop)
+- If using HTTP, choose a supported LLM for LLM_PROVIDER (any implementation of BaseClient) and send your API REST requests to the system's endpoints (routes_sessions.py). Make sure you have a valid API key for the model's API set in the .env
 
 ## Current State
 - MCP integration and a standalone HTTP API are both functional.
