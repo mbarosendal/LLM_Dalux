@@ -28,7 +28,7 @@ The project provides UML-inspired diagrams for an overview of the system and key
 ## How to Use
 ### Configuration overview
 1) Create an .env file in the project root folder
-2) Populate the .env with required credentials and Id's for the Dalux (and LLM API if using the HTTP-track)
+2) Populate the .env with required credentials and Id's for the Dalux (and LLM API-key if using the HTTP-track)
 ```
 DALUX_API_KEY=<api-key>
 DALUX_BASE_URL=<base-url>
