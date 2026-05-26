@@ -35,7 +35,7 @@ DALUX_BASE_URL=<base-url>
 DALUX_PROJECT_ID=<project-id> for scoped testing
 DALUX_USER_ID=<user-id> for current user context in data
 ```
-4) Install dependencies from pyproject.toml (from the project root):
+3) Install dependencies from pyproject.toml (from the project root):
 ```
 uv sync --frozen
 ```
