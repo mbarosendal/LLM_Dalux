@@ -16,6 +16,7 @@ from mcp_dalux.session_models import SessionState, render_session_history
 logger = logging.getLogger(__name__)
 
 _llm_client = get_llm_client()
+# Instantiation of the adapter should be moved to session_service with an abstraction and DIP to soften coupling and allow for session-specific scoping if adding more data sources.
 _adapter = DaluxAdapter()
 _available_tools = get_tool_names()
 
