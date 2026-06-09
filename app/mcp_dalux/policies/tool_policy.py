@@ -44,14 +44,11 @@ class ToolPolicy:
             rolling_cutoff = now - self.window_seconds
 
             # Filter out calls that took place before the rolling cutoff (call_time is a float tracking call age in seconds).
-            recent_calls = [
-                call_time for call_time in self.calls_by_timed_session.get(counter_key, []) if call_time > rolling_cutoff
-            ]
+            recent_calls = [call_time for call_time in self.calls_by_timed_session.get(counter_key, []) if call_time > rolling_cutoff]
 
             if len(recent_calls) >= self.max_calls:
                 message = (
-                    f"Tool call limit reached for '{fn.__name__}' in this session: "
-                    f"max {self.max_calls} calls per {self.window_seconds} seconds."
+                    f"Tool call limit reached for '{fn.__name__}' in this session: max {self.max_calls} calls per {self.window_seconds} seconds."
                 )
                 raise ToolError(message) from ToolPolicyError(message)
 

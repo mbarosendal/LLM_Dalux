@@ -12,36 +12,51 @@ class ToolSpec:
 
 
 _TOOL_SPECS: dict[str, ToolSpec] = {
-    # "get_current_user_context": ToolSpec(
-    #     name="get_current_user_context",
-    #     description="Resolve current user context for personal queries.",
-    #     usage="Call this first for 'my/me/mine' requests to anchor the actor user and then filter results by that user.",
-    #     arguments_hint="project_id is optional.",
-    # ),
+    "get_current_user_context": ToolSpec(
+        tool_name="get_current_user_context",
+        description="Resolve current user context for personal queries.",
+        usage="Call this first for 'my/me/mine' requests to anchor the actor user and then filter results by that user.",
+        arguments_hint="project_id is optional.",
+    ),
     "get_tasks": ToolSpec(
         tool_name="get_tasks",
         description="List tasks for discovery and filtering.",
-        usage="Use for task overviews, counts, searches, and picking candidate tasks by subject/type/number. For current or final status, prefer get_task_changes. Use it as the discovery step before any status question.",
-        arguments_hint="project_id and bookmark are optional. Returns lightweight fields such as taskId, subject, typeName, number, created, and createdByUserId.",
+        usage=(
+            "Use for task overviews, counts, searches, and picking candidate tasks by "
+            "subject/type/number when the current session context does not already contain "
+            "enough task data. For current or final status, prefer get_task_changes. "
+            "Use it as the discovery step before any status question, but do not repeat "
+            "an overview if the user is following up on a task already discussed."
+        ),
+        arguments_hint=(
+            "project_id and bookmark are optional. Returns lightweight fields such as "
+            "taskId, subject, typeName, number, created, and createdByUserId."
+        ),
     ),
     "get_task_changes": ToolSpec(
         tool_name="get_task_changes",
         description="List task change events and inferred statuses.",
-        usage="Primary tool for task progress, open vs closed, and final status. Use taskSummaries as the source of truth for status answers. Use items only for timelines or detail questions. Do not re-infer status if inferredStatus or finalStatus is present.",
+        usage=(
+            "Primary tool for task progress, open vs closed, and final status. Use "
+            "taskSummaries as the source of truth for status answers. Use items only for "
+            "timelines or detail questions. Do not re-infer status if inferredStatus or "
+            "finalStatus is present. If the session history already contains enough task "
+            "detail for a follow-up question, answer from that context instead of calling again."
+        ),
         arguments_hint="project_id and bookmark are optional. Returns both event-level items and taskSummaries with latest status information.",
     ),
     # "get_users": ToolSpec(
-    #     name="get_users",
+    #     tool_name="get_users",
     #     description="List users for lookup and matching.",
     #     usage="Use for discovery by name/company. Use get_user only when a specific userId is already known.",
     #     arguments_hint="project_id is optional.",
     # ),
-    # "get_user": ToolSpec(
-    #     name="get_user",
-    #     description="Get one user by known userId.",
-    #     usage="Use only when userId is already known and you need a single-user lookup.",
-    #     arguments_hint="user_id is required, project_id is optional.",
-    # ),
+    "get_user": ToolSpec(
+        tool_name="get_user",
+        description="Get one user by known userId.",
+        usage="Use only when userId is already known and you need a single-user lookup.",
+        arguments_hint="user_id is required, project_id is optional.",
+    ),
     "get_workpackages": ToolSpec(
         tool_name="get_workpackages",
         description="List workpackages for discovery and matching.",
