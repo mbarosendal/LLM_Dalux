@@ -69,4 +69,9 @@ class ClaudeClient(BaseClient):
 
     async def check_health(self) -> bool:
         """Check Claude client health by verifying API key is set."""
-        pass
+        if not Config.CLAUDE_API_KEY:
+            logger.warning("Claude health check failed: CLAUDE_API_KEY not set")
+            return False
+
+        logger.info("Claude health check passed")
+        return True
