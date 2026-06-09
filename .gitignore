@@ -26,3 +26,5 @@ tests/handshake_test.py
 tests/handshake_with_auth.py
 test-api - Copy.ps1
 test-api chat .ps1
+
+app/mcp_dalux/llm/clients/groq_client.py
