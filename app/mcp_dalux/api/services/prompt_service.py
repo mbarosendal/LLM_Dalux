@@ -56,7 +56,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
 
     session_state = get_session_state(prompt_input.session_id)
 
-    runtime_instructions = build_runtime_instructions_for_http(session_state)
+    runtime_instructions = build_runtime_instructions_for_http(session_state, processed_text)
     scope_key = f"http-session:{prompt_input.session_id}"
 
     add_session_turn(session_state, "user", processed_text)
@@ -66,6 +66,7 @@ async def send_prompt_response(prompt_input: PromptInput) -> SendPromptResponse:
             processed_text,
             runtime_instructions,
             scope_key,
+            session_state,
         )
     except Exception as exc:
         logger.exception("LLM request failed for session_id=%s", prompt_input.session_id)
