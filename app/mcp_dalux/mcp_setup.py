@@ -6,6 +6,7 @@ from mcp_dalux.llm.services.instructions_service import build_runtime_instructio
 from mcp_dalux.llm.tools.dalux_tools_tasks import register_dalux_tools_tasks
 
 # from mcp_dalux.llm.tools.dalux_tools_users import register_dalux_tools_users
+from mcp_dalux.llm.tools.dalux_tools_users import register_dalux_tools_users
 from mcp_dalux.llm.tools.dalux_tools_workpackages import register_dalux_tools_workpackages
 from mcp_dalux.session_models import SessionState, get_default_session_state
 
@@ -29,7 +30,7 @@ def create_mcp_server(session_state: SessionState | None = None) -> FastMCP:
     adapter = DaluxAdapter()
 
     # User-related tools are intentionally disabled for deployment.
-    # register_dalux_tools_users(mcp, adapter)
+    register_dalux_tools_users(mcp, adapter)
     if active_session.category == "tasks":
         register_dalux_tools_tasks(mcp, adapter)
         register_dalux_tools_workpackages(mcp, adapter)
