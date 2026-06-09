@@ -15,6 +15,7 @@ def build_runtime_instructions(
     project_id: str | None,
     project_name: str | None,
     actor_user_id: str | None,
+    current_user_input: str | None = None,
     conversation_history: str | None = None,
 ) -> str:
     """Compose runtime instructions shared by HTTP and MCP transport paths."""
@@ -38,5 +39,8 @@ def build_runtime_instructions(
 
     if conversation_history:
         sections.append(conversation_history)
+
+    if current_user_input:
+        sections.append(f"CURRENT USER QUESTION:\n{current_user_input.strip()}")
 
     return "\n\n".join(section.strip() for section in sections if section.strip())
